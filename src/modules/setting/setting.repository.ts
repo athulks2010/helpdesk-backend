@@ -81,6 +81,41 @@ export class SettingRepository {
     }
   }
 
+  async updateSmtp(body: any) {
+    try {
+      let itemsToUpdate: { slug: string; value: any }[] = []
+
+      if (Array.isArray(body)) {
+        itemsToUpdate = body
+      } else if (body && Array.isArray(body.settings)) {
+        itemsToUpdate = body.settings
+      } else if (body && typeof body.settings === 'object' && body.settings !== null) {
+        itemsToUpdate = Object.entries(body.settings).map(([slug, value]) => ({ slug, value }))
+      } else if (body && typeof body === 'object') {
+        itemsToUpdate = Object.entries(body).map(([slug, value]) => ({ slug, value }))
+      }
+
+      const updatedSettings: any[] = []
+      for (const item of itemsToUpdate) {
+        if (!item.slug) continue
+        const valStr = item.value !== undefined && item.value !== null ? String(item.value) : ''
+        
+        let setting = await Setting.findOne({ where: { slug: item.slug } })
+        if (setting) {
+          await setting.update({ value: valStr })
+        } else {
+          setting = await Setting.create({ slug: item.slug, value: valStr })
+        }
+        updatedSettings.push(setting)
+      }
+
+      return { items: updatedSettings, message: 'SMTP settings updated successfully' }
+    } catch (err: any) {
+      if (err instanceof Exception) throw err
+      throw new Exception(err)
+    }
+  }
+
   async restore(_id: number | string) {
     throw new Exception({ message: 'Restore is not supported for Setting', httpResponseCode: 400 })
   }

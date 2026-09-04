@@ -100,9 +100,6 @@
  *               country_id:
  *                 type: number
  *                 example: 1
- *               role_id:
- *                 type: number
- *                 example: 2
  *               photo_path:
  *                 type: string
  *                 example: "/files/user/profile.png"

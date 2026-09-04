@@ -16,6 +16,7 @@ export class LanguageService {
   }
 
   update(body: any) {
+    body.updated_at = new Date()
     return repo.update(body)
   }
 

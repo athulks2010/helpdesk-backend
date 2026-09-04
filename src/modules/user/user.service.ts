@@ -13,6 +13,7 @@ export class UserService {
   }
 
   async create(body: any) {
+    if (!body.role_id) body.role_id = 2
     var item = await repo.create(body)
     await mailService.sendTemplate('user_created', item.email, {
       first_name: item.first_name,

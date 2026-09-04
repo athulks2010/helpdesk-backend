@@ -172,3 +172,31 @@
  *       401:
  *         description: Unauthenticated
  */
+
+/**
+ * @swagger
+ * /setting/smtp/update:
+ *   post:
+ *     summary: Update SMTP settings by slug
+ *     tags: [Setting]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               mail_host: "smtp.gmail.com"
+ *               mail_port: "587"
+ *               mail_username: "user@gmail.com"
+ *               mail_password: "password"
+ *               mail_encryption: "tls"
+ *               mail_from_address: "user@gmail.com"
+ *               mail_from_name: "HelpDesk"
+ *     responses:
+ *       200:
+ *         description: SMTP settings updated successfully
+ *       401:
+ *         description: Unauthenticated
+ */
+

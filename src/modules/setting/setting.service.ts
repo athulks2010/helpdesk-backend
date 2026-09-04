@@ -19,6 +19,10 @@ export class SettingService {
     return repo.update(body)
   }
 
+  updateSmtp(body: any) {
+    return repo.updateSmtp(body)
+  }
+
   destroy(id: number | string) {
     return repo.destroy(id)
   }

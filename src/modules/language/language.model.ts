@@ -6,6 +6,7 @@ export class Language extends Model {
   declare name?: string
   declare code?: string
   declare flag?: string
+  declare updated_at?: Date
 }
 
 export const initLanguageModel = () => {
@@ -15,6 +16,7 @@ export const initLanguageModel = () => {
       name: DataTypes.STRING,
       code: DataTypes.STRING,
       flag: DataTypes.STRING,
+      updated_at: DataTypes.DATE,
     },
     {
       sequelize: getSequelize(),

@@ -20,7 +20,7 @@ import { initPasswordResetModel } from './auth/password-reset.model'
 import { Organization, initOrganizationModel } from './organization/organization.model'
 import { initSettingModel } from './setting/setting.model'
 import { initFaqModel } from './faq/faq.model'
-import { initPostModel } from './post/post.model'
+import { Post, initPostModel } from './post/post.model'
 import { KnowledgeBase, initKnowledgeBaseModel } from './knowledge-base/knowledge-base.model'
 import { initEmailTemplateModel } from './email-template/email-template.model'
 import { initLanguageModel } from './language/language.model'
@@ -105,6 +105,8 @@ export async function initAllModels() {
   MessageAttachment.belongsTo(Message, { as: 'message', foreignKey: 'message_id' })
 
   KnowledgeBase.belongsTo(Type, { as: 'type', foreignKey: 'type_id' })
+  Post.belongsTo(Type, { as: 'type', foreignKey: 'type_id' })
+  Post.belongsTo(User, { as: 'author', foreignKey: 'author_id' })
 
   return {
     User,

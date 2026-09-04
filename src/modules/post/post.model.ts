@@ -9,6 +9,10 @@ export class Post extends Model {
   declare image?: string
   declare type_id?: number
   declare details?: string
+  declare created_at?: Date
+  declare updated_at?: Date
+  declare type?: any
+  declare author?: any
 
   get content() {
     return this.getDataValue('details')
@@ -42,6 +46,8 @@ export const initPostModel = () => {
       image: DataTypes.STRING,
       type_id: DataTypes.BIGINT.UNSIGNED,
       details: DataTypes.TEXT,
+      created_at: DataTypes.DATE,
+      updated_at: DataTypes.DATE,
     },
     {
       sequelize: getSequelize(),

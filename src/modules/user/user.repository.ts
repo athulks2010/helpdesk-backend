@@ -2,8 +2,6 @@ import bcrypt from 'bcryptjs'
 import { Op } from 'sequelize'
 import { Exception } from '../../core'
 import { User } from './user.model'
-import fs from 'fs'
-import path from 'path'
 import { PendingUser } from './pending-user.model'
 
 const SAFE_EXCLUDE = ['password', 'remember_token']
@@ -44,20 +42,7 @@ export class UserRepository {
     return user
   }
 
-  private validatePhotoPath(photoPath?: string) {
-    if (!photoPath) return
-    const publicDir = path.resolve(process.cwd(), 'public')
-    const fullPath = path.resolve(publicDir, photoPath.replace(/^\//, ''))
-    if (!fullPath.startsWith(publicDir)) {
-      throw new Exception({ message: 'Invalid photo path', httpResponseCode: 400 })
-    }
-    if (!fs.existsSync(fullPath)) {
-      throw new Exception({ message: 'Photo file does not exist', httpResponseCode: 400 })
-    }
-  }
-
   async create(body: any) {
-    this.validatePhotoPath(body.photo_path)
     const payload = { ...body }
     if (!payload.name) {
       payload.name = `${payload.first_name || ''} ${payload.last_name || ''}`.trim() || 'User'
@@ -77,9 +62,6 @@ export class UserRepository {
     if (!id) throw new Exception({ message: 'id is required', httpResponseCode: 422 })
     const user = await User.findByPk(id)
     if (!user) throw new Exception({ message: 'User not found', httpResponseCode: 404 })
-    
-    this.validatePhotoPath(body.photo_path)
-    
     const payload = { ...body }
     delete payload.id
     if (payload.first_name || payload.last_name) {

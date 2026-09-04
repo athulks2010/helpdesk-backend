@@ -1,5 +1,7 @@
 import { Op } from 'sequelize'
 import { Post } from './post.model'
+import { Type } from '../type/type.model'
+import { User } from '../user/user.model'
 import { Exception } from '../../core'
 
 export class PostRepository {
@@ -31,6 +33,10 @@ export class PostRepository {
         order: [[sortField, sortOrder]],
         limit: pageSize,
         offset: (pageNumber - 1) * pageSize,
+        include: [
+          { model: Type, as: 'type' },
+          { model: User, as: 'author', attributes: { exclude: ['password', 'remember_token'] } },
+        ],
       })
 
       result.items = rows
@@ -59,7 +65,12 @@ export class PostRepository {
   }
 
   async findById(id: number | string) {
-    const item = await Post.findByPk(id)
+    const item = await Post.findByPk(id, {
+      include: [
+        { model: Type, as: 'type' },
+        { model: User, as: 'author', attributes: { exclude: ['password', 'remember_token'] } },
+      ],
+    })
     if (!item) throw new Exception({ message: 'Post not found', httpResponseCode: 404 })
     return item
   }

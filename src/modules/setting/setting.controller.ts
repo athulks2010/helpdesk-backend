@@ -22,6 +22,10 @@ export class SettingController {
     return { ...(item?.toJSON?.() || item), message: 'Setting updated successfully' }
   }
 
+  async updateSmtp(body: any) {
+    return this.service.updateSmtp(body)
+  }
+
   async delete(query: any) {
     const item = await this.service.destroy(query.id)
     return { ...(item?.toJSON?.() || item), message: 'Setting deleted successfully' }
