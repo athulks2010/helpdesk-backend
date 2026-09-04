@@ -4,7 +4,21 @@ import { Ticket } from './ticket.model'
 import { Comment } from './comment.model'
 import { User } from '../user/user.model'
 import { Contact } from '../contact/contact.model'
+import { Status } from '../status/status.model'
+import { Priority } from '../priority/priority.model'
+import { Department } from '../department/department.model'
+import { Type } from '../type/type.model'
 import { mailService } from '../../utils/mail'
+
+const defaultIncludes = [
+  { model: Status, as: 'status', attributes: ['id', 'name'] },
+  { model: Priority, as: 'priority', attributes: ['id', 'name'] },
+  { model: Department, as: 'department', attributes: ['id', 'name'] },
+  { model: Type, as: 'type', attributes: ['id', 'name'] },
+  { model: User, as: 'assignedTo', attributes: ['id', 'first_name', 'last_name', 'email'] },
+  { model: User, as: 'user', attributes: ['id', 'first_name', 'last_name', 'email'] },
+  { model: Contact, as: 'contact', attributes: ['id', 'first_name', 'last_name', 'email'] },
+]
 
 export class TicketRepository {
   async findAll(query: any = {}) {
@@ -29,8 +43,7 @@ export class TicketRepository {
     const sortField = query.sortField || 'id'
     const sortOrder = (query.sortOrder || 'desc').toUpperCase() === 'ASC' ? 'ASC' : 'DESC'
 
-    const include: any[] = []
-    // Optional includes can be passed from service when associations are ready
+    const include: any[] = [...defaultIncludes]
     if (query.includes && Array.isArray(query.includes)) {
       include.push(...query.includes)
     }
@@ -97,7 +110,7 @@ export class TicketRepository {
   }
 
   async findById(id: number | string) {
-    const ticket = await Ticket.findByPk(id)
+    const ticket = await Ticket.findByPk(id, { include: defaultIncludes })
     if (!ticket) throw new Exception({ message: 'Ticket not found', httpResponseCode: 404 })
     return ticket
   }
