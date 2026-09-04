@@ -1,5 +1,6 @@
 import { Op } from 'sequelize'
 import { Category } from './category.model'
+import { Department } from '../department/department.model'
 import { Exception } from '../../core'
 
 export class CategoryRepository {
@@ -30,6 +31,10 @@ export class CategoryRepository {
         order: [[sortField, sortOrder]],
         limit: pageSize,
         offset: (pageNumber - 1) * pageSize,
+        include: [
+          { model: Department, as: 'department' },
+          { model: Category, as: 'parent' },
+        ],
       })
 
       result.items = rows
@@ -44,7 +49,12 @@ export class CategoryRepository {
   }
 
   async findById(id: number | string) {
-    const item = await Category.findByPk(id)
+    const item = await Category.findByPk(id, {
+      include: [
+        { model: Department, as: 'department' },
+        { model: Category, as: 'parent' },
+      ],
+    })
     if (!item) throw new Exception({ message: 'Category not found', httpResponseCode: 404 })
     return item
   }

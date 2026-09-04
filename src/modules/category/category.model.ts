@@ -7,6 +7,9 @@ export class Category extends Model {
   declare department_id?: number
   declare parent_id?: number
   declare color?: string
+  declare department?: any
+  declare parent?: any
+  declare subcategories?: any
 }
 
 export const initCategoryModel = () => {

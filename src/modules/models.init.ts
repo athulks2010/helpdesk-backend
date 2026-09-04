@@ -109,6 +109,10 @@ export async function initAllModels() {
   Post.belongsTo(Type, { as: 'type', foreignKey: 'type_id' })
   Post.belongsTo(User, { as: 'author', foreignKey: 'author_id' })
 
+  Category.belongsTo(Department, { as: 'department', foreignKey: 'department_id' })
+  Category.belongsTo(Category, { as: 'parent', foreignKey: 'parent_id' })
+  Category.hasMany(Category, { as: 'subcategories', foreignKey: 'parent_id' })
+
   return {
     User,
     PendingUser,
