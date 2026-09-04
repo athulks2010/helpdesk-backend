@@ -21,7 +21,7 @@ import { Organization, initOrganizationModel } from './organization/organization
 import { initSettingModel } from './setting/setting.model'
 import { initFaqModel } from './faq/faq.model'
 import { initPostModel } from './post/post.model'
-import { initKnowledgeBaseModel } from './knowledge-base/knowledge-base.model'
+import { KnowledgeBase, initKnowledgeBaseModel } from './knowledge-base/knowledge-base.model'
 import { initEmailTemplateModel } from './email-template/email-template.model'
 import { initLanguageModel } from './language/language.model'
 import { initNoteModel } from './note/note.model'
@@ -103,6 +103,8 @@ export async function initAllModels() {
   Participant.belongsTo(Conversation, { as: 'conversation', foreignKey: 'conversation_id' })
   Message.hasMany(MessageAttachment, { as: 'attachments', foreignKey: 'message_id' })
   MessageAttachment.belongsTo(Message, { as: 'message', foreignKey: 'message_id' })
+
+  KnowledgeBase.belongsTo(Type, { as: 'type', foreignKey: 'type_id' })
 
   return {
     User,

@@ -1,6 +1,7 @@
 import { Op } from 'sequelize'
 import { KnowledgeBase } from './knowledge-base.model'
 import { Exception } from '../../core'
+import { Type } from '../type/type.model'
 
 export class KnowledgeBaseRepository {
   async findAll(query: any = {}) {
@@ -28,6 +29,7 @@ export class KnowledgeBaseRepository {
 
       const { rows, count } = await KnowledgeBase.findAndCountAll({
         where,
+        include: [{ model: Type, as: 'type' }],
         order: [[sortField, sortOrder]],
         limit: pageSize,
         offset: (pageNumber - 1) * pageSize,
