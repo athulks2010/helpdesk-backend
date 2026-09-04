@@ -1,11 +1,11 @@
 import crypto from 'crypto'
 import { Exception, Validator } from '../../core'
 import { SanctumTokenService } from '../../utils/sanctum'
-import { mailService } from '../../utils/mail'
 import { User } from '../user/user.model'
 import { Role } from '../role/role.model'
 import { PasswordReset } from './password-reset.model'
 import { EmailTemplate } from '../email-template/email-template.model'
+import { mailService } from '../../utils/mail'
 import {
   LoginDto,
   RegisterDto,
@@ -56,12 +56,8 @@ export class AuthService {
       role_id: roleId,
     })
     await user.reload({ include: [{ model: Role, as: 'role' }] })
-    
-    await mailService.sendTemplate('user_created', user.email, {
-      first_name: user.first_name,
-      last_name: user.last_name,
-      email: user.email,
-    })
+
+
 
     const token = await sanctum.createToken(user.id, 'api-token')
     return {

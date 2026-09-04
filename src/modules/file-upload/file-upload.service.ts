@@ -3,9 +3,9 @@ import path from 'path'
 
 const UPLOAD_DIR = path.resolve(process.cwd(), 'public', 'files')
 
-const ensureUploadDir = () => {
-  if (!fs.existsSync(UPLOAD_DIR)) {
-    fs.mkdirSync(UPLOAD_DIR, { recursive: true })
+const ensureUploadDir = (dir: string = UPLOAD_DIR) => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
   }
 }
 
@@ -14,14 +14,38 @@ export class FileUploadService {
     if (!file) {
       return { message: 'No file uploaded', item: null }
     }
+    let folder = body.folder;
+    if (folder) {
+      // Sanitize folder name to prevent directory traversal
+      folder = folder.replace(/[^a-zA-Z0-9_-]/g, '');
+    }
+    if (!folder) folder = 'files';
+
+    let finalPath = `/files/${file.filename}`;
+    let absolutePath = file.path;
+
+    if (folder !== 'files') {
+      const targetDir = path.resolve(process.cwd(), 'public', 'files', folder);
+      ensureUploadDir(targetDir);
+      
+      const newFilePath = path.join(targetDir, file.filename);
+      fs.renameSync(file.path, newFilePath);
+      absolutePath = newFilePath;
+      
+      finalPath = `/files/${folder}/${file.filename}`;
+    }
+
+    const isSaved = fs.existsSync(absolutePath);
+
     return {
       item: {
         name: file.originalname,
         filename: file.filename,
-        path: `/files/${file.filename}`,
+        path: finalPath,
         mime: file.mimetype,
         size: file.size,
-        folder: body.folder || 'files',
+        folder,
+        isSaved,
       },
       message: 'File uploaded successfully',
     }

@@ -26,6 +26,9 @@
  *               file:
  *                 type: string
  *                 format: binary
+ *               folder:
+ *                 type: string
+ *                 description: Name of the folder to save the file in
  *     responses:
  *       200:
  *         description: File uploaded successfully

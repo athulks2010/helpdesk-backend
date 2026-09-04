@@ -103,6 +103,9 @@
  *               role_id:
  *                 type: number
  *                 example: 2
+ *               photo_path:
+ *                 type: string
+ *                 example: "/files/user/profile.png"
  *     responses:
  *       200:
  *         description: User created successfully
@@ -152,6 +155,9 @@
  *               role_id:
  *                 type: number
  *                 example: 2
+ *               photo_path:
+ *                 type: string
+ *                 example: "/files/user/profile.png"
  *     responses:
  *       200:
  *         description: User updated successfully
