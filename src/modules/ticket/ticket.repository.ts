@@ -213,6 +213,10 @@ export class TicketRepository {
   async getComments(ticketId: number | string) {
     const items = await Comment.findAll({
       where: { ticket_id: ticketId },
+      include: [
+        { model: User, as: 'user', attributes: ['id', 'first_name', 'last_name', 'email'] },
+        { model: Contact, as: 'contact', attributes: ['id', 'first_name', 'last_name', 'email'] },
+      ],
       order: [['id', 'ASC']],
     })
     return { items, totalCount: items.length, message: 'Comments fetched successfully' }

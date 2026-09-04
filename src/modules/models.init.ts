@@ -93,6 +93,7 @@ export async function initAllModels() {
   Ticket.hasMany(Comment, { as: 'comments', foreignKey: 'ticket_id' })
   Comment.belongsTo(Ticket, { as: 'ticket', foreignKey: 'ticket_id' })
   Comment.belongsTo(User, { as: 'user', foreignKey: 'user_id' })
+  Comment.belongsTo(Contact, { as: 'contact', foreignKey: 'contact_id' })
 
   Ticket.hasMany(Attachment, { as: 'attachments', foreignKey: 'ticket_id' })
   Attachment.belongsTo(Ticket, { as: 'ticket', foreignKey: 'ticket_id' })
