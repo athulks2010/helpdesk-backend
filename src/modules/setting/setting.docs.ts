@@ -60,6 +60,28 @@
 
 /**
  * @swagger
+ * /setting/by-slug:
+ *   get:
+ *     summary: Get setting value/object by slug
+ *     tags: [Setting]
+ *     parameters:
+ *       - in: query
+ *         name: slug
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: app_name
+ *     responses:
+ *       200:
+ *         description: Setting fetched successfully
+ *       401:
+ *         description: Unauthenticated
+ *       404:
+ *         description: Record not found
+ */
+
+/**
+ * @swagger
  * /setting/create:
  *   post:
  *     summary: Create setting
@@ -175,9 +197,22 @@
 
 /**
  * @swagger
+ * /setting/smtp:
+ *   get:
+ *     summary: Get SMTP settings
+ *     tags: [Setting]
+ *     responses:
+ *       200:
+ *         description: SMTP settings fetched successfully
+ *       401:
+ *         description: Unauthenticated
+ */
+
+/**
+ * @swagger
  * /setting/smtp/update:
  *   post:
- *     summary: Update SMTP settings by slug
+ *     summary: Update SMTP settings
  *     tags: [Setting]
  *     requestBody:
  *       required: true
@@ -190,7 +225,7 @@
  *               mail_port: "587"
  *               mail_username: "user@gmail.com"
  *               mail_password: "password"
- *               mail_encryption: "tls"
+ *               mail_encryption: "ssl"
  *               mail_from_address: "user@gmail.com"
  *               mail_from_name: "HelpDesk"
  *     responses:
@@ -199,4 +234,82 @@
  *       401:
  *         description: Unauthenticated
  */
+
+/**
+ * @swagger
+ * /setting/pusher:
+ *   get:
+ *     summary: Get Pusher settings
+ *     tags: [Setting]
+ *     responses:
+ *       200:
+ *         description: Pusher settings fetched successfully
+ *       401:
+ *         description: Unauthenticated
+ */
+
+/**
+ * @swagger
+ * /setting/pusher/update:
+ *   post:
+ *     summary: Update Pusher settings
+ *     tags: [Setting]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               pusher_app_id: "2190018"
+ *               pusher_app_key: "your-app-key"
+ *               pusher_app_secret: "your-app-secret"
+ *               pusher_app_cluster: "ap2"
+ *     responses:
+ *       200:
+ *         description: Pusher settings updated successfully
+ *       401:
+ *         description: Unauthenticated
+ */
+
+/**
+ * @swagger
+ * /setting/email-piping:
+ *   get:
+ *     summary: Get Email Piping (IMAP) settings
+ *     tags: [Setting]
+ *     responses:
+ *       200:
+ *         description: Email piping settings fetched successfully
+ *       401:
+ *         description: Unauthenticated
+ */
+
+/**
+ * @swagger
+ * /setting/email-piping/update:
+ *   post:
+ *     summary: Update Email Piping (IMAP) settings
+ *     tags: [Setting]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               enable_email_piping: "true"
+ *               imap_host: "imap.gmail.com"
+ *               imap_port: "993"
+ *               imap_protocol: "imap"
+ *               imap_encryption: "ssl"
+ *               imap_username: "user@gmail.com"
+ *               imap_password: "password"
+ *     responses:
+ *       200:
+ *         description: Email piping settings updated successfully
+ *       401:
+ *         description: Unauthenticated
+ */
+
 

@@ -50,6 +50,12 @@ export class SettingRepository {
     return item
   }
 
+  async findBySlug(slug: string) {
+    const item = await Setting.findOne({ where: { slug } })
+    if (!item) throw new Exception({ message: 'Setting not found', httpResponseCode: 404 })
+    return item
+  }
+
   async create(body: any) {
     try {
       return await Setting.create(body)
@@ -81,39 +87,43 @@ export class SettingRepository {
     }
   }
 
-  async updateSmtp(body: any) {
-    try {
-      let itemsToUpdate: { slug: string; value: any }[] = []
-
-      if (Array.isArray(body)) {
-        itemsToUpdate = body
-      } else if (body && Array.isArray(body.settings)) {
-        itemsToUpdate = body.settings
-      } else if (body && typeof body.settings === 'object' && body.settings !== null) {
-        itemsToUpdate = Object.entries(body.settings).map(([slug, value]) => ({ slug, value }))
-      } else if (body && typeof body === 'object') {
-        itemsToUpdate = Object.entries(body).map(([slug, value]) => ({ slug, value }))
+  async findBySlugs(slugs: string[]) {
+    const rows = await Setting.findAll({
+      where: {
+        slug: { [Op.in]: slugs },
+      },
+    })
+    const map: Record<string, string> = {}
+    for (const r of rows) {
+      if (r.slug) {
+        map[r.slug] = r.value || ''
       }
-
-      const updatedSettings: any[] = []
-      for (const item of itemsToUpdate) {
-        if (!item.slug) continue
-        const valStr = item.value !== undefined && item.value !== null ? String(item.value) : ''
-        
-        let setting = await Setting.findOne({ where: { slug: item.slug } })
-        if (setting) {
-          await setting.update({ value: valStr })
-        } else {
-          setting = await Setting.create({ slug: item.slug, value: valStr })
-        }
-        updatedSettings.push(setting)
-      }
-
-      return { items: updatedSettings, message: 'SMTP settings updated successfully' }
-    } catch (err: any) {
-      if (err instanceof Exception) throw err
-      throw new Exception(err)
     }
+    return map
+  }
+
+  async upsertBySlugs(items: { slug: string; value: any }[]) {
+    const updatedSettings: any[] = []
+    for (const item of items) {
+      if (!item.slug) continue
+      const valStr = item.value !== undefined && item.value !== null ? String(item.value) : ''
+      let setting = await Setting.findOne({ where: { slug: item.slug } })
+      if (setting) {
+        await setting.update({ value: valStr })
+      } else {
+        setting = await Setting.create({ slug: item.slug, value: valStr })
+      }
+      updatedSettings.push(setting)
+    }
+    return updatedSettings
+  }
+
+  async updateSmtp(body: any) {
+    return this.upsertBySlugs(
+      Array.isArray(body)
+        ? body
+        : Object.entries(body || {}).map(([slug, value]) => ({ slug, value }))
+    )
   }
 
   async restore(_id: number | string) {
