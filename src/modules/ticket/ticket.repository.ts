@@ -2,6 +2,9 @@ import { Op } from 'sequelize'
 import { Exception } from '../../core'
 import { Ticket } from './ticket.model'
 import { Comment } from './comment.model'
+import { User } from '../user/user.model'
+import { Contact } from '../contact/contact.model'
+import { mailService } from '../../utils/mail'
 
 export class TicketRepository {
   async findAll(query: any = {}) {
@@ -81,6 +84,18 @@ export class TicketRepository {
     return payload
   }
 
+  private async getTicketEmail(ticket: any) {
+    if (ticket.user_id) {
+      const user = await User.findByPk(ticket.user_id)
+      return user?.email
+    }
+    if (ticket.contact_id) {
+      const contact = await Contact.findByPk(ticket.contact_id)
+      return contact?.email
+    }
+    return null
+  }
+
   async findById(id: number | string) {
     const ticket = await Ticket.findByPk(id)
     if (!ticket) throw new Exception({ message: 'Ticket not found', httpResponseCode: 404 })
@@ -92,15 +107,55 @@ export class TicketRepository {
     if (!payload.uid) {
       payload.uid = String(Math.floor(100000 + Math.random() * 900000))
     }
-    return Ticket.create(payload)
+    const ticket = await Ticket.create(payload)
+
+    try {
+      const email = await this.getTicketEmail(ticket)
+      if (email) {
+        await mailService.sendTemplate('create_ticket_new_customer', email, {
+          ticket_id: ticket.uid,
+          subject: ticket.subject,
+        })
+      }
+    } catch (err) {
+      console.error('[TicketRepo:create mail]', err)
+    }
+
+    return ticket
   }
 
   async update(body: any) {
     const id = body.id
     if (!id) throw new Exception({ message: 'id is required', httpResponseCode: 422 })
     const ticket = await this.findById(id)
+    
+    const oldAssignedTo = ticket.assigned_to
+
     const payload = this.mapTicketPayload(body)
     await ticket.update(payload)
+
+    try {
+      if (payload.assigned_to && payload.assigned_to !== oldAssignedTo) {
+        const assignee = await User.findByPk(payload.assigned_to)
+        if (assignee && assignee.email) {
+          await mailService.sendTemplate('assigned_ticket', assignee.email, {
+            ticket_id: ticket.uid,
+            subject: ticket.subject,
+          })
+        }
+      }
+
+      const email = await this.getTicketEmail(ticket)
+      if (email) {
+        await mailService.sendTemplate('ticket_updated', email, {
+          ticket_id: ticket.uid,
+          subject: ticket.subject,
+        })
+      }
+    } catch (err) {
+      console.error('[TicketRepo:update mail]', err)
+    }
+
     return ticket
   }
 
@@ -123,7 +178,23 @@ export class TicketRepository {
       payload.details = payload.body
     }
     delete payload.body
-    return Comment.create(payload)
+    const comment = await Comment.create(payload)
+
+    try {
+      const ticket = await this.findById(payload.ticket_id)
+      const email = await this.getTicketEmail(ticket)
+      if (email) {
+        await mailService.sendTemplate('ticket_new_comment', email, {
+          ticket_id: ticket.uid,
+          subject: ticket.subject,
+          comment: payload.details,
+        })
+      }
+    } catch (err) {
+      console.error('[TicketRepo:comment mail]', err)
+    }
+
+    return comment
   }
 
   async getComments(ticketId: number | string) {

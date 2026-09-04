@@ -4,6 +4,9 @@ import { Conversation } from './conversation.model'
 import { Message } from './message.model'
 import { Participant } from './participant.model'
 import { MessageAttachment } from './message-attachment.model'
+import { User } from '../user/user.model'
+import { Contact } from '../contact/contact.model'
+import { mailService } from '../../utils/mail'
 
 export class ConversationRepository {
   async findAll(query: any = {}) {
@@ -46,6 +49,28 @@ export class ConversationRepository {
     return item
   }
 
+  private async getParticipantEmail(p: any) {
+    if (p.user_id) {
+      const user = await User.findByPk(p.user_id)
+      return user?.email
+    }
+    if (p.contact_id) {
+      const contact = await Contact.findByPk(p.contact_id)
+      return contact?.email
+    }
+    return null
+  }
+
+  private async getConversationParticipantsEmails(conversationId: number) {
+    const participants = await Participant.findAll({ where: { conversation_id: conversationId } })
+    const emails: string[] = []
+    for (const p of participants) {
+      const email = await this.getParticipantEmail(p)
+      if (email) emails.push(email)
+    }
+    return emails
+  }
+
   async create(body: any) {
     const payload = this.mapPayload(body)
     const conversation = await Conversation.create(payload)
@@ -56,6 +81,17 @@ export class ConversationRepository {
           user_id: p.user_id,
           contact_id: p.contact_id,
         })
+        try {
+          const email = await this.getParticipantEmail(p)
+          if (email) {
+            await mailService.sendTemplate('conversation_created', email, {
+              title: conversation.title,
+              conversation_id: conversation.id,
+            })
+          }
+        } catch (err) {
+          console.error('[ConvRepo:create mail]', err)
+        }
       }
     }
     return conversation
@@ -101,6 +137,19 @@ export class ConversationRepository {
         })
       }
     }
+
+    try {
+      const emails = await this.getConversationParticipantsEmails(data.conversation_id)
+      for (const email of emails) {
+        await mailService.sendTemplate('conversation_new_message', email, {
+          message: data.message,
+          conversation_id: data.conversation_id,
+        })
+      }
+    } catch (err) {
+      console.error('[ConvRepo:sendMessage mail]', err)
+    }
+
     return msg
   }
 
