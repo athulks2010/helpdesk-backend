@@ -3,6 +3,14 @@ import { Router } from '../../core'
 
 const controller = new SettingController()
 
+/** Public / unauthenticated setting routes */
+export const setting = new Router()
+setting.get('/by-slug', async (req) => controller.findBySlug({ ...req.query, ...req.params }))
+setting.get('/slug', async (req) => controller.findBySlug({ ...req.query, ...req.params }))
+setting.get('/by-slug/:slug', async (req) => controller.findBySlug({ ...req.query, ...req.params }))
+setting.get('/slug/:slug', async (req) => controller.findBySlug({ ...req.query, ...req.params }))
+
+/** Protected setting routes (requires auth) */
 export const settingWithMiddleware = new Router()
 settingWithMiddleware.get('/all', async (req) => controller.all(req.query))
 settingWithMiddleware.get('/single', async (req) => controller.single(req.query))
