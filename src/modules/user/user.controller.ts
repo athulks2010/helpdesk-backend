@@ -14,6 +14,7 @@ export class UserController {
 
   async create(body: any) {
     const item = await this.service.create(body)
+
     return { item, message: 'User created successfully' }
   }
 

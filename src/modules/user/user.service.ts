@@ -1,5 +1,6 @@
 import { UserRepository } from './user.repository'
-
+import { EmailTemplate } from '../email-template/email-template.model'
+import { mailService } from '../../utils/mail'
 const repo = new UserRepository()
 
 export class UserService {
@@ -11,8 +12,14 @@ export class UserService {
     return repo.findById(id)
   }
 
-  create(body: any) {
-    return repo.create(body)
+  async create(body: any) {
+    var item = await repo.create(body)
+    await mailService.sendTemplate('user_created', item.email, {
+      first_name: item.first_name,
+      last_name: item.last_name,
+      email: item.email,
+    })
+    return item
   }
 
   update(body: any) {
