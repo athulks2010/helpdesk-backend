@@ -5,8 +5,6 @@ export class Ticket extends Model {
   declare id: number
   declare uid?: string
   declare subject?: string
-  declare message_id?: string
-  declare in_reply_to?: string
   declare parent_id?: number
   declare status_id?: number
   declare open?: Date
@@ -15,10 +13,7 @@ export class Ticket extends Model {
   declare response?: Date | null
   declare user_id?: number
   declare contact_id?: number
-  declare client_type?: number
-  declare email?: string
   declare created_by?: string
-  declare location?: string
   declare priority_id?: number
   declare department_id?: number
   declare category_id?: number
@@ -27,22 +22,10 @@ export class Ticket extends Model {
   declare type_id?: number
   declare impact_level?: string
   declare urgency_level?: string
-  declare due_date?: Date | null
-  declare estimated_hours?: number
-  declare actual_hours?: number
-  declare sla_breach_at?: Date | null
-  declare resolution?: string
-  declare tags?: any
-  declare source?: string
   declare parent_ticket_id?: number
   declare template_id?: number
-  declare last_customer_response?: Date | null
-  declare last_agent_response?: Date | null
-  declare custom_fields?: any
-  declare external_id?: string
   declare sla_policy_id?: number
   declare details?: string
-  declare review_id?: number
 
   // Aliases for backwards compatibility
   get uuid() {
@@ -116,8 +99,6 @@ export const initTicketModel = () => {
       id: { type: DataTypes.BIGINT.UNSIGNED, autoIncrement: true, primaryKey: true },
       uid: DataTypes.STRING,
       subject: DataTypes.STRING,
-      message_id: DataTypes.STRING,
-      in_reply_to: DataTypes.STRING,
       parent_id: DataTypes.INTEGER,
       status_id: DataTypes.INTEGER,
       open: DataTypes.DATE,
@@ -126,10 +107,7 @@ export const initTicketModel = () => {
       response: DataTypes.DATE,
       user_id: DataTypes.INTEGER,
       contact_id: DataTypes.INTEGER,
-      client_type: DataTypes.INTEGER,
-      email: DataTypes.STRING,
       created_by: DataTypes.STRING,
-      location: DataTypes.STRING,
       priority_id: DataTypes.INTEGER,
       department_id: DataTypes.INTEGER,
       category_id: DataTypes.INTEGER,
@@ -138,22 +116,10 @@ export const initTicketModel = () => {
       type_id: DataTypes.INTEGER,
       impact_level: DataTypes.STRING,
       urgency_level: DataTypes.STRING,
-      due_date: DataTypes.DATE,
-      estimated_hours: DataTypes.DECIMAL(8, 2),
-      actual_hours: DataTypes.DECIMAL(8, 2),
-      sla_breach_at: DataTypes.DATE,
-      resolution: DataTypes.TEXT,
-      tags: DataTypes.JSON,
-      source: DataTypes.STRING,
       parent_ticket_id: DataTypes.BIGINT.UNSIGNED,
       template_id: DataTypes.BIGINT.UNSIGNED,
-      last_customer_response: DataTypes.DATE,
-      last_agent_response: DataTypes.DATE,
-      custom_fields: DataTypes.JSON,
-      external_id: DataTypes.STRING,
       sla_policy_id: DataTypes.BIGINT.UNSIGNED,
       details: DataTypes.TEXT,
-      review_id: DataTypes.INTEGER,
     },
     {
       sequelize: getSequelize(),
