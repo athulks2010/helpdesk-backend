@@ -99,6 +99,23 @@ export class NavigationMenuRepository {
     }
   }
 
+  async reorder(updates: { id: number; sort_order: number }[]) {
+    try {
+      const updatedItems: any[] = []
+      for (const item of updates) {
+        const menu = await NavigationMenu.findByPk(item.id)
+        if (menu) {
+          await menu.update({ sort_order: item.sort_order })
+          updatedItems.push(menu)
+        }
+      }
+      return { items: updatedItems, message: 'Navigation menus reordered successfully' }
+    } catch (err: any) {
+      if (err instanceof Exception) throw err
+      throw new Exception(err)
+    }
+  }
+
   async restore(_id: number | string) {
     throw new Exception({ message: 'Restore is not supported for Navigation menu', httpResponseCode: 400 })
   }

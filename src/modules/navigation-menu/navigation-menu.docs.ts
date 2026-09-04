@@ -227,3 +227,35 @@
  *       401:
  *         description: Unauthenticated
  */
+
+/**
+ * @swagger
+ * /navigation-menu/reorder:
+ *   post:
+ *     summary: Reorder navigation menus
+ *     tags: [NavigationMenu]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: array
+ *             items:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                 sort_order:
+ *                   type: number
+ *             example:
+ *               - id: 1
+ *                 sort_order: 1
+ *               - id: 2
+ *                 sort_order: 2
+ *     responses:
+ *       200:
+ *         description: Navigation menus reordered successfully
+ *       401:
+ *         description: Unauthenticated
+ */
+

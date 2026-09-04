@@ -22,6 +22,10 @@ export class NavigationMenuController {
     return { ...(item?.toJSON?.() || item), message: 'Navigation menu updated successfully' }
   }
 
+  async reorder(body: any) {
+    return this.service.reorder(body)
+  }
+
   async delete(query: any) {
     const item = await this.service.destroy(query.id)
     return { ...(item?.toJSON?.() || item), message: 'Navigation menu deleted successfully' }

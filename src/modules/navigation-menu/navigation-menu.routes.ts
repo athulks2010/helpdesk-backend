@@ -8,5 +8,7 @@ navigationMenuWithMiddleware.get('/all', async (req) => controller.all(req.query
 navigationMenuWithMiddleware.get('/single', async (req) => controller.single(req.query))
 navigationMenuWithMiddleware.post('/create', async (req) => controller.create(req.body))
 navigationMenuWithMiddleware.put('/update', async (req) => controller.update(req.body))
+navigationMenuWithMiddleware.post('/reorder', async (req) => controller.reorder(req.body))
+navigationMenuWithMiddleware.put('/reorder', async (req) => controller.reorder(req.body))
 navigationMenuWithMiddleware.delete('/delete', async (req) => controller.delete(req.query))
 navigationMenuWithMiddleware.post('/restore', async (req) => controller.restore(req.body))
