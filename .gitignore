@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+environments/*.env
+!environments/*.env.example
+public/files/*
+!public/files/.gitkeep
+public/images/*
+!public/images/.gitkeep
+src/core/logs/*.log
+.DS_Store
+*.log
