@@ -42,6 +42,15 @@ export class UserRepository {
     return user
   }
 
+  async findByEmail(email: string, includeRole = false) {
+    const options: any = { where: { email } }
+    if (includeRole) {
+      options.include = [{ association: 'role' }]
+    }
+    const user = await User.findOne(options)
+    return user
+  }
+
   async create(body: any) {
     const payload = { ...body }
     if (!payload.name) {

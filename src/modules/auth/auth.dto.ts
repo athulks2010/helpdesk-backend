@@ -27,8 +27,20 @@ export class RegisterDto {
   password_confirmation?: string
 
   @IsOptional()
+  @IsString()
+  phone?: string
+
+  @IsOptional()
   @IsNumber()
-  role_id?: number
+  country_id?: number
+
+  @IsOptional()
+  @IsString()
+  city?: string
+
+  @IsOptional()
+  @IsString()
+  address?: string
 }
 
 export class PasswordResetDto {

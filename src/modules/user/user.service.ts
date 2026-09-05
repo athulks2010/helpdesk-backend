@@ -14,16 +14,23 @@ export class UserService {
 
   async create(body: any) {
     if (!body.role_id) body.role_id = 2
+    if (body.first_name || body.last_name) {
+      body.name = `${body.first_name || ''} ${body.last_name || ''}`.trim()
+    }
     var item = await repo.create(body)
     await mailService.sendTemplate('user_created', item.email, {
       first_name: item.first_name,
       last_name: item.last_name,
       email: item.email,
+      password: body.password,
     })
     return item
   }
 
   update(body: any) {
+    if (body.first_name || body.last_name) {
+      body.name = `${body.first_name || ''} ${body.last_name || ''}`.trim()
+    }
     return repo.update(body)
   }
 

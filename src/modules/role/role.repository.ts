@@ -35,6 +35,10 @@ export class RoleRepository {
     return role
   }
 
+  async findBySlug(slug: string) {
+    return Role.findOne({ where: { slug } })
+  }
+
   async create(body: any) {
     const payload = { ...body }
     if (typeof payload.access === 'string') {

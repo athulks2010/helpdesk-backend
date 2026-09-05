@@ -66,9 +66,18 @@
  *               password_confirmation:
  *                 type: string
  *                 example: Password1
- *               role_id:
- *                 type: number
+ *               phone:
+ *                 type: string
+ *                 example: "1234567890"
+ *               country_id:
+ *                 type: integer
  *                 example: 1
+ *               city:
+ *                 type: string
+ *                 example: "New York"
+ *               address:
+ *                 type: string
+ *                 example: "123 Main St"
  *     responses:
  *       200:
  *         description: Registration successful

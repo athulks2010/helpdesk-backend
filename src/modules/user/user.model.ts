@@ -3,6 +3,7 @@ import { getSequelize } from '../../core/db/db.connection'
 
 export class User extends Model {
   declare id: number
+  declare name: string
   declare first_name: string
   declare last_name: string
   declare email: string
@@ -58,6 +59,7 @@ export const initUserModel = () => {
   User.init(
     {
       id: { type: DataTypes.BIGINT.UNSIGNED, autoIncrement: true, primaryKey: true },
+      name: DataTypes.STRING,
       first_name: DataTypes.STRING,
       last_name: DataTypes.STRING,
       email: { type: DataTypes.STRING, allowNull: false },
