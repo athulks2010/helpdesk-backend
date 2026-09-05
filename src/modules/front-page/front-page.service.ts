@@ -11,12 +11,20 @@ export class FrontPageService {
     return repo.findById(id)
   }
 
+  findBySlug(slug: string) {
+    return repo.findBySlug(slug)
+  }
+
   create(body: any) {
     return repo.create(body)
   }
 
   update(body: any) {
     return repo.update(body)
+  }
+
+  updateBySlug(body: any) {
+    return repo.updateBySlug(body)
   }
 
   destroy(id: number | string) {

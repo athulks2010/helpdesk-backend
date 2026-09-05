@@ -40,6 +40,10 @@ export class SettingController {
     return this.service.updateSmtpSettings(body)
   }
 
+  async testSmtp(body: any) {
+    return this.service.testSmtpSettings(body)
+  }
+
   async getPusher() {
     const item = await this.service.getPusherSettings()
     return { item, message: 'Pusher settings fetched successfully' }
@@ -49,6 +53,10 @@ export class SettingController {
     return this.service.updatePusherSettings(body)
   }
 
+  async testPusher(body: any) {
+    return this.service.testPusherSettings(body)
+  }
+
   async getPiping() {
     const item = await this.service.getPipingSettings()
     return { item, message: 'Email piping settings fetched successfully' }
@@ -56,6 +64,10 @@ export class SettingController {
 
   async updatePiping(body: any) {
     return this.service.updatePipingSettings(body)
+  }
+
+  async testPiping(body: any) {
+    return this.service.testPipingSettings(body)
   }
 
   async delete(query: any) {

@@ -60,6 +60,12 @@ export class FrontPageRepository {
     return item
   }
 
+  async findBySlug(slug: string) {
+    const item = await FrontPage.findOne({ where: { slug } })
+    if (!item) throw new Exception({ message: 'Front page not found', httpResponseCode: 404 })
+    return item
+  }
+
   async create(body: any) {
     try {
       const payload = this.mapPayload(body)
@@ -73,6 +79,20 @@ export class FrontPageRepository {
     try {
       const id = body?.id
       const item = await this.findById(id)
+      const payload = this.mapPayload(body)
+      await item.update(payload)
+      return item
+    } catch (err: any) {
+      if (err instanceof Exception) throw err
+      throw new Exception(err)
+    }
+  }
+
+  async updateBySlug(body: any) {
+    try {
+      const slug = body?.slug
+      if (!slug) throw new Exception({ message: 'slug is required', httpResponseCode: 422 })
+      const item = await this.findBySlug(slug)
       const payload = this.mapPayload(body)
       await item.update(payload)
       return item

@@ -26,16 +26,19 @@ settingWithMiddleware.post('/update', async (req) => controller.update(req.body)
 settingWithMiddleware.get('/smtp', async () => controller.getSmtp())
 settingWithMiddleware.post('/smtp/update', async (req) => controller.updateSmtp(req.body))
 settingWithMiddleware.put('/smtp/update', async (req) => controller.updateSmtp(req.body))
+settingWithMiddleware.post('/smtp/test', async (req) => controller.testSmtp(req.body))
 
 // Pusher
 settingWithMiddleware.get('/pusher', async () => controller.getPusher())
 settingWithMiddleware.post('/pusher/update', async (req) => controller.updatePusher(req.body))
 settingWithMiddleware.put('/pusher/update', async (req) => controller.updatePusher(req.body))
+settingWithMiddleware.post('/pusher/test', async (req) => controller.testPusher(req.body))
 
 // Email Piping (IMAP)
 settingWithMiddleware.get('/email-piping', async () => controller.getPiping())
 settingWithMiddleware.post('/email-piping/update', async (req) => controller.updatePiping(req.body))
 settingWithMiddleware.put('/email-piping/update', async (req) => controller.updatePiping(req.body))
+settingWithMiddleware.post('/email-piping/test', async (req) => controller.testPiping(req.body))
 settingWithMiddleware.post('/piping/update', async (req) => controller.updatePiping(req.body))
 settingWithMiddleware.put('/piping/update', async (req) => controller.updatePiping(req.body))
 

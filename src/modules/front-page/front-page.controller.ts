@@ -12,6 +12,11 @@ export class FrontPageController {
     return { ...(item?.toJSON?.() || item), message: 'Front page fetched successfully' }
   }
 
+  async singleBySlug(query: any) {
+    const item = await this.service.findBySlug(query.slug)
+    return { ...(item?.toJSON?.() || item), message: 'Front page fetched successfully' }
+  }
+
   async create(body: any) {
     const item = await this.service.create(body)
     return { ...(item?.toJSON?.() || item), message: 'Front page created successfully' }
@@ -19,6 +24,11 @@ export class FrontPageController {
 
   async update(body: any) {
     const item = await this.service.update(body)
+    return { ...(item?.toJSON?.() || item), message: 'Front page updated successfully' }
+  }
+
+  async updateBySlug(body: any) {
+    const item = await this.service.updateBySlug(body)
     return { ...(item?.toJSON?.() || item), message: 'Front page updated successfully' }
   }
 

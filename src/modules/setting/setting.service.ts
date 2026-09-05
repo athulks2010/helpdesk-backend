@@ -164,6 +164,30 @@ export class SettingService {
     return { item: await this.getSmtpSettings(), message: 'SMTP settings updated successfully' }
   }
 
+  async testSmtpSettings(body: any) {
+    try {
+      const nodemailer = require('nodemailer')
+      const transporter = nodemailer.createTransport({
+        host: body.mail_host,
+        port: Number(body.mail_port || 587),
+        secure: body.mail_encryption === 'ssl' || body.mail_port == 465,
+        auth: body.mail_username ? {
+          user: body.mail_username,
+          pass: body.mail_password,
+        } : undefined,
+      })
+      await transporter.sendMail({
+        from: `"${body.mail_from_name || 'HelpDesk'}" <${body.mail_from_address || body.mail_username}>`,
+        to: body.mail_from_address || body.mail_username,
+        subject: 'SMTP Test Email',
+        html: '<p>This is a test email to verify your SMTP settings.</p>',
+      })
+      return { message: 'Test email sent successfully' }
+    } catch (err: any) {
+      throw new Exception({ message: 'Failed to send test email: ' + err.message, httpResponseCode: 400 })
+    }
+  }
+
   // Pusher Settings
   async getPusherSettings() {
     return {
@@ -193,6 +217,27 @@ export class SettingService {
     updateEnvFile(envUpdates)
 
     return { item: await this.getPusherSettings(), message: 'Pusher settings updated successfully' }
+  }
+
+  async testPusherSettings(body: any) {
+    try {
+      if (!body.pusher_app_id || !body.pusher_app_key || !body.pusher_app_secret) {
+        throw new Error('App ID, Key, and Secret are required to test Pusher')
+      }
+
+      const Pusher = require('pusher')
+      const pusher = new Pusher({
+        appId: String(body.pusher_app_id),
+        key: String(body.pusher_app_key),
+        secret: String(body.pusher_app_secret),
+        cluster: String(body.pusher_app_cluster || 'mt1'),
+        useTLS: true,
+      })
+      await pusher.trigger('test-channel', 'test-event', { message: 'Test Pusher Settings' })
+      return { message: 'Pusher test event triggered successfully' }
+    } catch (err: any) {
+      throw new Exception({ message: 'Failed to test Pusher: ' + err.message, httpResponseCode: 400 })
+    }
   }
 
   // Email Piping Settings
@@ -231,6 +276,33 @@ export class SettingService {
     updateEnvFile(envUpdates)
 
     return { item: await this.getPipingSettings(), message: 'Email piping settings updated successfully' }
+  }
+
+  async testPipingSettings(body: any) {
+    try {
+      if (!body.imap_host || !body.imap_username || !body.imap_password) {
+        throw new Error('IMAP Host, Username, and Password are required')
+      }
+
+      const { ImapFlow } = require('imapflow')
+      const client = new ImapFlow({
+        host: String(body.imap_host),
+        port: Number(body.imap_port || 993),
+        secure: body.imap_encryption === 'ssl' || body.imap_encryption === 'tls' || String(body.imap_port) === '993',
+        auth: {
+          user: String(body.imap_username),
+          pass: String(body.imap_password)
+        },
+        logger: false
+      })
+
+      await client.connect()
+      await client.logout()
+
+      return { message: 'IMAP connection successful' }
+    } catch (err: any) {
+      throw new Exception({ message: 'Failed to connect to IMAP: ' + err.message, httpResponseCode: 400 })
+    }
   }
 
   destroy(id: number | string) {
