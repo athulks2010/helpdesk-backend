@@ -45,4 +45,16 @@ export class TicketController {
   async getComments(query: any) {
     return this.service.getComments(query.ticket_id || query.id)
   }
+
+  async getFavorites(tokenHolder: any) {
+    return this.service.getFavorites(tokenHolder.id)
+  }
+
+  async addFavorite(body: any, tokenHolder: any) {
+    return this.service.addFavorite(tokenHolder.id, body.ticket_id)
+  }
+
+  async removeFavorite(body: any, tokenHolder: any) {
+    return this.service.removeFavorite(tokenHolder.id, body.ticket_id)
+  }
 }

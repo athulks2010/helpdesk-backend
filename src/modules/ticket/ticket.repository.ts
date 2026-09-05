@@ -1,6 +1,7 @@
 import { Op } from 'sequelize'
 import { Exception } from '../../core'
 import { Ticket } from './ticket.model'
+import { TicketFavorite } from './ticket-favorite.model'
 import { Comment } from './comment.model'
 import { User } from '../user/user.model'
 import { Contact } from '../contact/contact.model'
@@ -220,5 +221,32 @@ export class TicketRepository {
       order: [['id', 'ASC']],
     })
     return { items, totalCount: items.length, message: 'Comments fetched successfully' }
+  }
+
+  async getFavorites(userId: number) {
+    const favorites = await TicketFavorite.findAll({ where: { user_id: userId } })
+    const ticketIds = favorites.map(f => f.ticket_id)
+    if (ticketIds.length === 0) return { items: [], totalCount: 0, message: 'Favorites fetched successfully' }
+    
+    const { rows, count } = await Ticket.findAndCountAll({
+      where: { id: ticketIds },
+      include: defaultIncludes,
+      order: [['id', 'DESC']]
+    })
+    return { items: rows, totalCount: count, message: 'Favorites fetched successfully' }
+  }
+
+  async addFavorite(userId: number, ticketId: number) {
+    if (!ticketId) throw new Exception({ message: 'Ticket ID is required', httpResponseCode: 422 })
+    const exists = await TicketFavorite.findOne({ where: { user_id: userId, ticket_id: ticketId } })
+    if (exists) return { message: 'Already in favorites' }
+    await TicketFavorite.create({ user_id: userId, ticket_id: ticketId })
+    return { message: 'Added to favorites' }
+  }
+
+  async removeFavorite(userId: number, ticketId: number) {
+    if (!ticketId) throw new Exception({ message: 'Ticket ID is required', httpResponseCode: 422 })
+    await TicketFavorite.destroy({ where: { user_id: userId, ticket_id: ticketId } })
+    return { message: 'Removed from favorites' }
   }
 }

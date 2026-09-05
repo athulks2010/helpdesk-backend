@@ -2,6 +2,7 @@ import { User, initUserModel } from './user/user.model'
 import { PendingUser, initPendingUserModel } from './user/pending-user.model'
 import { Role, initRoleModel } from './role/role.model'
 import { Ticket, initTicketModel } from './ticket/ticket.model'
+import { TicketFavorite, initTicketFavoriteModel } from './ticket/ticket-favorite.model'
 import { Comment, initCommentModel } from './ticket/comment.model'
 import { Attachment, initAttachmentModel } from './ticket/attachment.model'
 import { Conversation, initConversationModel } from './conversation/conversation.model'
@@ -47,6 +48,7 @@ export async function initAllModels() {
   initCategoryModel()
 
   initTicketModel()
+  initTicketFavoriteModel()
   initCommentModel()
   initAttachmentModel()
 
