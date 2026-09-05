@@ -15,6 +15,6 @@ ticketWithMiddleware.post('/comments', async (req) =>
 )
 ticketWithMiddleware.get('/comments', async (req) => ticketController.getComments(req.query))
 
-ticketWithMiddleware.get('/favorites', async (req) => ticketController.getFavorites((req as any).tokenHolder))
+ticketWithMiddleware.get('/favorites', async (req) => ticketController.getFavorites(req.query, (req as any).tokenHolder))
 ticketWithMiddleware.post('/favorites', async (req) => ticketController.addFavorite(req.body, (req as any).tokenHolder))
 ticketWithMiddleware.delete('/favorites', async (req) => ticketController.removeFavorite(req.body, (req as any).tokenHolder))

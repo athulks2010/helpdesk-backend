@@ -46,8 +46,8 @@ export class TicketController {
     return this.service.getComments(query.ticket_id || query.id)
   }
 
-  async getFavorites(tokenHolder: any) {
-    return this.service.getFavorites(tokenHolder.id)
+  async getFavorites(query: any, tokenHolder: any) {
+    return this.service.getFavorites(tokenHolder.id, query.ticket_id || query.id)
   }
 
   async addFavorite(body: any, tokenHolder: any) {

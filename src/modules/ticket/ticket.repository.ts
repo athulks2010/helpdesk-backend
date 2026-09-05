@@ -223,16 +223,28 @@ export class TicketRepository {
     return { items, totalCount: items.length, message: 'Comments fetched successfully' }
   }
 
-  async getFavorites(userId: number) {
-    const favorites = await TicketFavorite.findAll({ where: { user_id: userId } })
+  async getFavorites(userId: number, ticketId?: number) {
+    const whereClause: any = { user_id: userId }
+    if (ticketId) whereClause.ticket_id = ticketId
+
+    const favorites = await TicketFavorite.findAll({ where: whereClause })
     const ticketIds = favorites.map(f => f.ticket_id)
-    if (ticketIds.length === 0) return { items: [], totalCount: 0, message: 'Favorites fetched successfully' }
+    if (ticketIds.length === 0) {
+      if (ticketId) throw new Exception({ message: 'Favorite not found', httpResponseCode: 404 })
+      return { items: [], totalCount: 0, message: 'Favorites fetched successfully' }
+    }
     
     const { rows, count } = await Ticket.findAndCountAll({
       where: { id: ticketIds },
       include: defaultIncludes,
       order: [['id', 'DESC']]
     })
+    
+    if (ticketId) {
+      if (rows.length === 0) throw new Exception({ message: 'Favorite not found', httpResponseCode: 404 })
+      return { item: rows[0], message: 'Favorite fetched successfully' }
+    }
+    
     return { items: rows, totalCount: count, message: 'Favorites fetched successfully' }
   }
 

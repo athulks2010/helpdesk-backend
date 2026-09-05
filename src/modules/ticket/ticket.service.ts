@@ -35,8 +35,8 @@ export class TicketService {
     return repo.getComments(ticketId)
   }
 
-  getFavorites(userId: number) {
-    return repo.getFavorites(userId)
+  getFavorites(userId: number, ticketId?: number) {
+    return repo.getFavorites(userId, ticketId)
   }
 
   addFavorite(userId: number, ticketId: number) {
