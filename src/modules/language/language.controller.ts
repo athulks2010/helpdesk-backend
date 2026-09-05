@@ -31,4 +31,24 @@ export class LanguageController {
     const item = await this.service.restore(body.id)
     return { ...(item?.toJSON?.() || item), message: 'Language restored successfully' }
   }
+
+  async getTranslations(query: any) {
+    const res = await this.service.getTranslations(query)
+    return res
+  }
+
+  async addPhrase(body: any) {
+    const res = await this.service.addPhrase(body)
+    return res
+  }
+
+  async updatePhrase(body: any) {
+    const res = await this.service.updatePhrase(body)
+    return res
+  }
+
+  async deletePhrase(queryOrBody: any) {
+    const res = await this.service.deletePhrase(queryOrBody)
+    return res
+  }
 }

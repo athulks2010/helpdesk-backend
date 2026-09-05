@@ -172,3 +172,115 @@
  *       401:
  *         description: Unauthenticated
  */
+
+/**
+ * @swagger
+ * /language/translations:
+ *   get:
+ *     summary: Get translations and phrase list for a language
+ *     tags: [Language]
+ *     parameters:
+ *       - in: query
+ *         name: code
+ *         schema:
+ *           type: string
+ *           example: cn
+ *       - in: query
+ *         name: id
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: searchText
+ *         schema:
+ *           type: string
+ *       - in: query
+ *         name: pageNumber
+ *         schema:
+ *           type: number
+ *       - in: query
+ *         name: pageSize
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Translations fetched successfully
+ */
+
+/**
+ * @swagger
+ * /language/phrase:
+ *   post:
+ *     summary: Add a new translation phrase (title and value pair)
+ *     tags: [Language]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 example: cn
+ *               key:
+ *                 type: string
+ *                 example: Submit Ticket
+ *               value:
+ *                 type: string
+ *                 example: 提交工单
+ *     responses:
+ *       200:
+ *         description: Phrase added successfully
+ *       400:
+ *         description: Validation error
+ *   put:
+ *     summary: Update translation phrase value (single phrase or bulk list)
+ *     tags: [Language]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               code:
+ *                 type: string
+ *                 example: cn
+ *               key:
+ *                 type: string
+ *                 example: Submit Ticket
+ *               value:
+ *                 type: string
+ *                 example: 提交新工单
+ *               language_values:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     name:
+ *                       type: string
+ *                     value:
+ *                       type: string
+ *     responses:
+ *       200:
+ *         description: Phrase updated successfully
+ *   delete:
+ *     summary: Delete a translation phrase
+ *     tags: [Language]
+ *     parameters:
+ *       - in: query
+ *         name: code
+ *         schema:
+ *           type: string
+ *           example: cn
+ *       - in: query
+ *         name: key
+ *         required: true
+ *         schema:
+ *           type: string
+ *           example: Submit Ticket
+ *     responses:
+ *       200:
+ *         description: Phrase deleted successfully
+ */
+
