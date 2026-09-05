@@ -22,7 +22,7 @@ export const initRoleModel = () => {
     {
       id: { type: DataTypes.BIGINT.UNSIGNED, autoIncrement: true, primaryKey: true },
       name: DataTypes.STRING,
-      slug: DataTypes.STRING,
+      slug: { type: DataTypes.STRING, unique: true },
       access: DataTypes.JSON,
     },
     { sequelize: getSequelize(), tableName: 'roles' }

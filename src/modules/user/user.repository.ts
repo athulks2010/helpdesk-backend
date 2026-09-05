@@ -28,6 +28,7 @@ export class UserRepository {
     const { rows, count } = await User.findAndCountAll({
       where,
       attributes: { exclude: SAFE_EXCLUDE },
+      include: [{ association: 'role' }],
       limit: pageSize,
       offset,
       order: [[sortField, sortOrder]],
