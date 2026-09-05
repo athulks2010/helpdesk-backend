@@ -21,7 +21,7 @@ import { typeWithMiddleware } from './modules/type/type.routes'
 import { faqWithMiddleware } from './modules/faq/faq.routes'
 import { noteWithMiddleware } from './modules/note/note.routes'
 import { setting, settingWithMiddleware } from './modules/setting/setting.routes'
-import { languageWithMiddleware } from './modules/language/language.routes'
+import { language, languageWithMiddleware } from './modules/language/language.routes'
 import { emailTemplateWithMiddleware } from './modules/email-template/email-template.routes'
 import { navigationMenu, navigationMenuWithMiddleware } from './modules/navigation-menu/navigation-menu.routes'
 import { frontPageWithMiddleware } from './modules/front-page/front-page.routes'
@@ -71,6 +71,7 @@ const bootstrap = async () => {
   app.use('/note', authenticationMiddleware, noteWithMiddleware.router)
   app.use('/setting', setting.router)
   app.use('/setting', authenticationMiddleware, settingWithMiddleware.router)
+  app.use('/language', language.router)
   app.use('/language', authenticationMiddleware, languageWithMiddleware.router)
   app.use('/email-template', authenticationMiddleware, emailTemplateWithMiddleware.router)
   app.use('/navigation-menu', navigationMenu.router)

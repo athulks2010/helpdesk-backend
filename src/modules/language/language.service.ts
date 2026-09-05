@@ -27,4 +27,20 @@ export class LanguageService {
   restore(id: number | string) {
     return repo.restore(id)
   }
+
+  getTranslations(query: any) {
+    return repo.getTranslations(query)
+  }
+
+  addPhrase(body: any) {
+    return repo.addPhrase(body)
+  }
+
+  updatePhrase(body: any) {
+    return repo.updatePhrase(body)
+  }
+
+  deletePhrase(queryOrBody: any) {
+    return repo.deletePhrase(queryOrBody)
+  }
 }
