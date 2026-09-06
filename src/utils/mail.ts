@@ -36,25 +36,27 @@ export class MailService {
       const { EmailTemplate } = require('../modules/email-template/email-template.model')
       const template = await EmailTemplate.findOne({ where: { slug } })
       const html = template?.html || template?.body
-      if (template && html) {
-        const replacements: Record<string, any> = {
-          url: process.env.APP_URL || '',
-          sender_name: process.env.MAIL_FROM_NAME || process.env.APP_NAME || 'HelpDesk',
-          app_name: process.env.APP_NAME || 'HelpDesk',
-          ...data,
-        }
-        if (!replacements.name && (data.first_name || data.last_name)) {
-          replacements.name = `${data.first_name || ''} ${data.last_name || ''}`.trim()
-        }
-        let body = html
-        for (const [key, val] of Object.entries(replacements)) {
-          const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-          const value = String(val ?? '')
-          body = body.replace(new RegExp(`\\{\\{${escaped}\\}\\}`, 'g'), value)
-          body = body.replace(new RegExp(`\\{${escaped}\\}`, 'g'), value)
-        }
-        return await this.send(to, template.name || template.subject || 'Notification', body)
+      if (!template || !html) {
+        console.error(`[mail:template] Template not found or empty: ${slug}`)
+        return { skipped: true, reason: `Template not found: ${slug}` }
       }
+      const replacements: Record<string, any> = {
+        url: process.env.APP_URL || '',
+        sender_name: process.env.MAIL_FROM_NAME || process.env.APP_NAME || 'HelpDesk',
+        app_name: process.env.APP_NAME || 'HelpDesk',
+        ...data,
+      }
+      if (!replacements.name && (data.first_name || data.last_name)) {
+        replacements.name = `${data.first_name || ''} ${data.last_name || ''}`.trim()
+      }
+      let body = html
+      for (const [key, val] of Object.entries(replacements)) {
+        const escaped = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const value = String(val ?? '')
+        body = body.replace(new RegExp(`\\{\\{${escaped}\\}\\}`, 'g'), value)
+        body = body.replace(new RegExp(`\\{${escaped}\\}`, 'g'), value)
+      }
+      return await this.send(to, template.name || template.subject || 'Notification', body)
     } catch (err) {
       console.error(`[mail:template] Failed to send template ${slug}`, err)
     }

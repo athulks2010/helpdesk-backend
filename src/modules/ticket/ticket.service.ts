@@ -1,9 +1,17 @@
 import { Exception } from '../../core'
 import { mailService } from '../../utils/mail'
+import { Type } from '../type/type.model'
 import { User } from '../user/user.model'
 import { TicketRepository } from './ticket.repository'
 
 const repo = new TicketRepository()
+
+const toId = (val: any): number | null => {
+  if (val && typeof val === 'object') val = val.id ?? val.user_id
+  if (val === undefined || val === null || val === '') return null
+  const n = Number(val)
+  return Number.isInteger(n) && n > 0 ? n : null
+}
 
 export class TicketService {
   findAll(query: any) {
@@ -20,48 +28,52 @@ export class TicketService {
     }
 
     const ticket = await repo.create(body)
+    const created = await repo.findById(ticket.id)
 
     try {
-      const email = await repo.getTicketEmail(ticket)
-      if (email) {
-        await mailService.sendTemplate('create_ticket_new_customer', email, {
-          uid: ticket.uid,
-          subject: ticket.subject,
-          type: (ticket as any).type?.name,
-          url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
+      const sent = new Set<string>()
+      const data = await this.ticketMailData(created)
+      const createSlug =
+        body.source === 'public' ? 'create_ticket_new_customer' : 'create_ticket_dashboard'
+
+      const requester = await repo.getTicketRecipient(created)
+      if (requester?.email) {
+        await mailService.sendTemplate(createSlug, requester.email, {
+          ...data,
+          name: requester.name,
+          email: requester.email,
         })
+        sent.add(requester.email.toLowerCase())
       }
 
-      // Notify all admins
+      const assignedTo = toId(created.assigned_to) || toId(body.assigned_to)
+      if (assignedTo) {
+        const assignee = await User.findByPk(assignedTo)
+        if (assignee?.email && !sent.has(assignee.email.toLowerCase())) {
+          await mailService.sendTemplate('assigned_ticket', assignee.email, {
+            ...data,
+            name: `${assignee.first_name || ''} ${assignee.last_name || ''}`.trim(),
+            email: assignee.email,
+          })
+          sent.add(assignee.email.toLowerCase())
+        }
+      }
+
       const admins = await User.findAll({ where: { role_id: 1 } })
       for (const admin of admins) {
-        if (admin.email) {
-          await mailService.sendTemplate('create_ticket_admin', admin.email, {
-            uid: ticket.uid,
-            subject: ticket.subject,
-            type: (ticket as any).type?.name,
-            url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
-          })
-        }
-      }
-
-      // Notify assigned user if provided during creation
-      if (ticket.assigned_to) {
-        const assignee = await User.findByPk(ticket.assigned_to)
-        if (assignee && assignee.email) {
-          await mailService.sendTemplate('assigned_ticket', assignee.email, {
-            uid: ticket.uid,
-            subject: ticket.subject,
-            type: (ticket as any).type?.name,
-            url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
-          })
-        }
+        if (!admin.email || sent.has(admin.email.toLowerCase())) continue
+        await mailService.sendTemplate(createSlug, admin.email, {
+          ...data,
+          name: `${admin.first_name || ''} ${admin.last_name || ''}`.trim(),
+          email: admin.email,
+        })
+        sent.add(admin.email.toLowerCase())
       }
     } catch (err) {
       console.error('[TicketService:create mail]', err)
     }
 
-    return ticket
+    return created
   }
 
   async update(body: any) {
@@ -74,25 +86,26 @@ export class TicketService {
     const ticket = await repo.update(body)
 
     try {
-      if (body.assigned_to && body.assigned_to !== oldAssignedTo) {
-        const assignee = await User.findByPk(body.assigned_to)
-        if (assignee && assignee.email) {
+      const data = await this.ticketMailData(ticket)
+      const newAssignedTo = toId(body.assigned_to)
+      const previousAssignedTo = toId(oldAssignedTo)
+      if (newAssignedTo && newAssignedTo !== previousAssignedTo) {
+        const assignee = await User.findByPk(newAssignedTo)
+        if (assignee?.email) {
           await mailService.sendTemplate('assigned_ticket', assignee.email, {
-            uid: ticket.uid,
-            subject: ticket.subject,
-            type: (ticket as any).type?.name,
-            url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
+            ...data,
+            name: `${assignee.first_name || ''} ${assignee.last_name || ''}`.trim(),
+            email: assignee.email,
           })
         }
       }
 
-      const email = await repo.getTicketEmail(ticket)
-      if (email) {
-        await mailService.sendTemplate('ticket_updated', email, {
-          uid: ticket.uid,
-          subject: ticket.subject,
-          type: (ticket as any).type?.name,
-          url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
+      const requester = await repo.getTicketRecipient(ticket)
+      if (requester?.email) {
+        await mailService.sendTemplate('ticket_updated', requester.email, {
+          ...data,
+          name: requester.name,
+          email: requester.email,
         })
       }
     } catch (err) {
@@ -147,5 +160,19 @@ export class TicketService {
 
   removeFavorite(userId: number, ticketId: number) {
     return repo.removeFavorite(userId, ticketId)
+  }
+
+  private async ticketMailData(ticket: any) {
+    let typeName = ticket?.type?.name
+    if (!typeName && ticket?.type_id) {
+      const type = await Type.findByPk(ticket.type_id)
+      typeName = type?.name
+    }
+    return {
+      uid: ticket.uid,
+      subject: ticket.subject,
+      type: typeName || '',
+      url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
+    }
   }
 }

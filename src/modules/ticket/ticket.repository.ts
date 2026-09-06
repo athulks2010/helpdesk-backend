@@ -10,6 +10,13 @@ import { Priority } from '../priority/priority.model'
 import { Department } from '../department/department.model'
 import { Type } from '../type/type.model'
 
+const toId = (val: any): number | null => {
+  if (val && typeof val === 'object') val = val.id ?? val.user_id
+  if (val === undefined || val === null || val === '') return null
+  const n = Number(val)
+  return Number.isInteger(n) && n > 0 ? n : null
+}
+
 const defaultIncludes = [
   { model: Status, as: 'status', attributes: ['id', 'name'] },
   { model: Priority, as: 'priority', attributes: ['id', 'name'] },
@@ -62,6 +69,21 @@ export class TicketRepository {
 
   mapTicketPayload(body: any) {
     const payload = { ...body }
+    if (payload.assignedTo !== undefined && payload.assigned_to === undefined) {
+      payload.assigned_to = payload.assignedTo
+    }
+    if (payload.assignee_id !== undefined && payload.assigned_to === undefined) {
+      payload.assigned_to = payload.assignee_id
+    }
+    if (payload.user && payload.user_id === undefined) {
+      payload.user_id = payload.user.id ?? payload.user
+    }
+    if (payload.contact && payload.contact_id === undefined) {
+      payload.contact_id = payload.contact.id ?? payload.contact
+    }
+    if (payload.user_id !== undefined) payload.user_id = toId(payload.user_id)
+    if (payload.contact_id !== undefined) payload.contact_id = toId(payload.contact_id)
+    if (payload.assigned_to !== undefined) payload.assigned_to = toId(payload.assigned_to)
     if (payload.uuid !== undefined && payload.uid === undefined) {
       payload.uid = payload.uuid
     }
@@ -97,16 +119,36 @@ export class TicketRepository {
     return payload
   }
 
-  async getTicketEmail(ticket: any) {
-    if (ticket.user_id) {
-      const user = await User.findByPk(ticket.user_id)
-      return user?.email
+  async getTicketRecipient(ticket: any) {
+    const userId = toId(ticket.user_id)
+    if (userId) {
+      const user = await User.findByPk(userId)
+      if (user?.email) {
+        return {
+          email: user.email,
+          name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
+        }
+      }
     }
-    if (ticket.contact_id) {
-      const contact = await Contact.findByPk(ticket.contact_id)
-      return contact?.email
+    const contactId = toId(ticket.contact_id)
+    if (contactId) {
+      const contact = await Contact.findByPk(contactId)
+      if (contact?.email) {
+        return {
+          email: contact.email,
+          name: `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.email,
+        }
+      }
+    }
+    if (ticket.email) {
+      return { email: ticket.email, name: ticket.email }
     }
     return null
+  }
+
+  async getTicketEmail(ticket: any) {
+    const recipient = await this.getTicketRecipient(ticket)
+    return recipient?.email || null
   }
 
   async findById(id: number | string) {

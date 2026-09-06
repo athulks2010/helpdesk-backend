@@ -4,12 +4,11 @@ import { Post } from '../post/post.model'
 import { KnowledgeBase } from '../knowledge-base/knowledge-base.model'
 import { Service } from '../service/service.model'
 import { FrontPage } from '../front-page/front-page.model'
-import { Ticket } from '../ticket/ticket.model'
+import { TicketService } from '../ticket/ticket.service'
 import { Conversation } from '../conversation/conversation.model'
 import { Message } from '../conversation/message.model'
 import { Contact } from '../contact/contact.model'
 import { getPusher } from '../../utils/pusher'
-import crypto from 'crypto'
 
 /** Public landing / open-ticket / chat init (no auth) */
 export const publicRouter = new Router()
@@ -52,18 +51,19 @@ publicRouter.get('/front-page', async (req) => {
 
 publicRouter.post('/ticket/open', async (req) => {
   const body = req.body || {}
-  const ticket = await Ticket.create({
+  const ticket = await new TicketService().create({
     subject: body.subject,
-    body: body.body || body.message,
-    uuid: crypto.randomUUID(),
+    details: body.details || body.body || body.message,
     user_id: body.user_id,
     contact_id: body.contact_id,
+    email: body.email,
     status_id: body.status_id,
     priority_id: body.priority_id,
     department_id: body.department_id,
     category_id: body.category_id,
     type_id: body.type_id,
-  } as any)
+    source: 'public',
+  })
   return { ...ticket.toJSON(), message: 'Ticket opened' }
 })
 
