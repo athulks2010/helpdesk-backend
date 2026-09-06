@@ -25,7 +25,8 @@ export class TicketService {
       const email = await repo.getTicketEmail(ticket)
       if (email) {
         await mailService.sendTemplate('create_ticket_new_customer', email, {
-          ticket,
+          uid: ticket.uid,
+          subject: ticket.subject,
           type: (ticket as any).type?.name,
         })
       }
@@ -35,7 +36,8 @@ export class TicketService {
       for (const admin of admins) {
         if (admin.email) {
           await mailService.sendTemplate('create_ticket_admin', admin.email, {
-            ticket,
+            uid: ticket.uid,
+            subject: ticket.subject,
             type: (ticket as any).type?.name,
           })
         }
@@ -46,7 +48,8 @@ export class TicketService {
         const assignee = await User.findByPk(ticket.assigned_to)
         if (assignee && assignee.email) {
           await mailService.sendTemplate('assigned_ticket', assignee.email, {
-            ticket,
+            uid: ticket.uid,
+            subject: ticket.subject,
             type: (ticket as any).type?.name,
           })
         }
@@ -72,7 +75,8 @@ export class TicketService {
         const assignee = await User.findByPk(body.assigned_to)
         if (assignee && assignee.email) {
           await mailService.sendTemplate('assigned_ticket', assignee.email, {
-            ticket,
+            uid: ticket.uid,
+            subject: ticket.subject,
             type: (ticket as any).type?.name,
           })
         }
@@ -81,7 +85,8 @@ export class TicketService {
       const email = await repo.getTicketEmail(ticket)
       if (email) {
         await mailService.sendTemplate('ticket_updated', email, {
-          ticket,
+          uid: ticket.uid,
+          subject: ticket.subject,
           type: (ticket as any).type?.name,
         })
       }
@@ -108,7 +113,8 @@ export class TicketService {
       const email = await repo.getTicketEmail(ticket)
       if (email) {
         await mailService.sendTemplate('ticket_new_comment', email, {
-          ticket,
+          uid: ticket.uid,
+          subject: ticket.subject,
           type: (ticket as any).type?.name,
         })
       }
