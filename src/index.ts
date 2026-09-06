@@ -8,6 +8,7 @@ import { startCronJobs } from './index.cron'
 
 import { auth, authWithMiddleware } from './modules/auth/auth.routes'
 import { ticketWithMiddleware } from './modules/ticket/ticket.routes'
+import { ticketFieldWithMiddleware } from './modules/ticket-field/ticket-field.routes'
 import { conversationWithMiddleware } from './modules/conversation/conversation.routes'
 import { userWithMiddleware } from './modules/user/user.routes'
 import { roleWithMiddleware } from './modules/role/role.routes'
@@ -57,6 +58,7 @@ const bootstrap = async () => {
 
   // Protected domain modules (GeoHaul-style paths)
   app.use('/ticket', authenticationMiddleware, ticketWithMiddleware.router)
+  app.use('/ticket-field', authenticationMiddleware, ticketFieldWithMiddleware.router)
   app.use('/conversation', authenticationMiddleware, conversationWithMiddleware.router)
   app.use('/user', authenticationMiddleware, userWithMiddleware.router)
   app.use('/role', authenticationMiddleware, roleWithMiddleware.router)

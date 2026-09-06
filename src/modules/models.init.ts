@@ -5,6 +5,9 @@ import { Ticket, initTicketModel } from './ticket/ticket.model'
 import { TicketFavorite, initTicketFavoriteModel } from './ticket/ticket-favorite.model'
 import { Comment, initCommentModel } from './ticket/comment.model'
 import { Attachment, initAttachmentModel } from './ticket/attachment.model'
+import { TicketEntry, initTicketEntryModel } from './ticket/ticket-entry.model'
+import { TicketActivity, initTicketActivityModel } from './ticket/ticket-activity.model'
+import { TicketField, initTicketFieldModel } from './ticket-field/ticket-field.model'
 import { Conversation, initConversationModel } from './conversation/conversation.model'
 import { Message, initMessageModel } from './conversation/message.model'
 import { Participant, initParticipantModel } from './conversation/participant.model'
@@ -51,6 +54,9 @@ export async function initAllModels() {
   initTicketFavoriteModel()
   initCommentModel()
   initAttachmentModel()
+  initTicketFieldModel()
+  initTicketEntryModel()
+  initTicketActivityModel()
 
   initConversationModel()
   initMessageModel()
@@ -100,6 +106,15 @@ export async function initAllModels() {
   Ticket.hasMany(Attachment, { as: 'attachments', foreignKey: 'ticket_id' })
   Attachment.belongsTo(Ticket, { as: 'ticket', foreignKey: 'ticket_id' })
 
+  Ticket.hasMany(TicketEntry, { as: 'ticketEntries', foreignKey: 'ticket_id' })
+  TicketEntry.belongsTo(Ticket, { as: 'ticket', foreignKey: 'ticket_id' })
+  TicketEntry.belongsTo(TicketField, { as: 'field', foreignKey: 'field_id' })
+  TicketField.hasMany(TicketEntry, { as: 'entries', foreignKey: 'field_id' })
+
+  Ticket.hasMany(TicketActivity, { as: 'activities', foreignKey: 'ticket_id' })
+  TicketActivity.belongsTo(Ticket, { as: 'ticket', foreignKey: 'ticket_id' })
+  TicketActivity.belongsTo(User, { as: 'user', foreignKey: 'user_id' })
+
   Conversation.hasMany(Message, { as: 'messages', foreignKey: 'conversation_id' })
   Message.belongsTo(Conversation, { as: 'conversation', foreignKey: 'conversation_id' })
   Conversation.hasMany(Participant, { as: 'participants', foreignKey: 'conversation_id' })
@@ -122,6 +137,9 @@ export async function initAllModels() {
     Ticket,
     Comment,
     Attachment,
+    TicketField,
+    TicketEntry,
+    TicketActivity,
     Conversation,
     Message,
     Participant,

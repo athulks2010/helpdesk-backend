@@ -9,6 +9,8 @@ import { Status } from '../status/status.model'
 import { Priority } from '../priority/priority.model'
 import { Department } from '../department/department.model'
 import { Type } from '../type/type.model'
+import { TicketEntry } from './ticket-entry.model'
+import { TicketActivity } from './ticket-activity.model'
 
 const toId = (val: any): number | null => {
   if (val && typeof val === 'object') val = val.id ?? val.user_id
@@ -25,6 +27,7 @@ const defaultIncludes = [
   { model: User, as: 'assignedTo', attributes: ['id', 'first_name', 'last_name', 'email'] },
   { model: User, as: 'user', attributes: ['id', 'first_name', 'last_name', 'email'] },
   { model: Contact, as: 'contact', attributes: ['id', 'first_name', 'last_name', 'email'] },
+  { model: TicketEntry, as: 'ticketEntries' },
 ]
 
 export class TicketRepository {
@@ -247,5 +250,16 @@ export class TicketRepository {
     if (!ticketId) throw new Exception({ message: 'Ticket ID is required', httpResponseCode: 422 })
     await TicketFavorite.destroy({ where: { user_id: userId, ticket_id: ticketId } })
     return { message: 'Removed from favorites' }
+  }
+
+  async getActivities(ticketId: number | string) {
+    if (!ticketId) throw new Exception({ message: 'ticket_id is required', httpResponseCode: 422 })
+    await this.findById(ticketId)
+    const items = await TicketActivity.findAll({
+      where: { ticket_id: ticketId },
+      include: [{ model: User, as: 'user', attributes: ['id', 'first_name', 'last_name', 'email'] }],
+      order: [['id', 'DESC']],
+    })
+    return { items, totalCount: items.length, message: 'Ticket activities fetched successfully' }
   }
 }

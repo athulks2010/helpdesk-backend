@@ -88,7 +88,16 @@ export class Ticket extends Model {
     const values: any = super.toJSON()
     values.body = this.getDataValue('details')
     values.uuid = this.getDataValue('uid')
-    values.custom_field = this.getDataValue('custom_fields')
+    const entries = values.ticketEntries || (this as any).ticketEntries
+    if (Array.isArray(entries) && entries.length) {
+      const custom: Record<string, any> = {}
+      for (const entry of entries) {
+        custom[entry.name] = entry.value
+      }
+      values.custom_field = custom
+    } else {
+      values.custom_field = this.getDataValue('custom_fields')
+    }
     return values
   }
 }

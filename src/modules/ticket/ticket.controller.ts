@@ -12,14 +12,18 @@ export class TicketController {
     return { item, message: 'Ticket fetched successfully' }
   }
 
-  async create(body: any) {
-    const item = await this.service.create(body)
+  async create(body: any, tokenHolder?: any) {
+    const item = await this.service.create(body, tokenHolder)
     return { item, message: 'Ticket created successfully' }
   }
 
-  async update(body: any) {
-    const item = await this.service.update(body)
+  async update(body: any, tokenHolder?: any) {
+    const item = await this.service.update(body, tokenHolder)
     return { item, message: 'Ticket updated successfully' }
+  }
+
+  async getActivities(query: any) {
+    return this.service.getActivities(query.ticket_id || query.id)
   }
 
   async destroy(query: any) {

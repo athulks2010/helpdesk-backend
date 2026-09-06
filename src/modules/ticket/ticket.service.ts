@@ -1,8 +1,41 @@
 import { Exception } from '../../core'
 import { mailService } from '../../utils/mail'
+import { TicketFieldService } from '../ticket-field/ticket-field.service'
 import { Type } from '../type/type.model'
 import { User } from '../user/user.model'
+import {
+  logTicketAssignment,
+  logTicketComment,
+  logTicketCreated,
+  logTicketFieldChange,
+  logTicketStatusChange,
+} from './ticket-activity.model'
 import { TicketRepository } from './ticket.repository'
+
+const fieldService = new TicketFieldService()
+const TRACKED_FIELDS = [
+  'status_id',
+  'assigned_to',
+  'priority_id',
+  'department_id',
+  'category_id',
+  'type_id',
+  'subject',
+  'details',
+]
+
+const extractCustomInputs = (body: any) => {
+  const raw = body?.custom_field ?? body?.custom_fields
+  if (!raw) return null
+  if (typeof raw === 'string') {
+    try {
+      return JSON.parse(raw)
+    } catch {
+      return null
+    }
+  }
+  return typeof raw === 'object' && !Array.isArray(raw) ? raw : null
+}
 
 const repo = new TicketRepository()
 
@@ -22,13 +55,22 @@ export class TicketService {
     return repo.findById(id)
   }
 
-  async create(body: any) {
+  async create(body: any, tokenHolder?: any) {
     if (!body.uid && !body.uuid) {
       body.uid = String(Math.floor(100000 + Math.random() * 900000))
     }
 
+    const customInputs = extractCustomInputs(body)
     const ticket = await repo.create(body)
+    if (customInputs) {
+      await fieldService.persistEntries(ticket.id, customInputs)
+    }
     const created = await repo.findById(ticket.id)
+    try {
+      await logTicketCreated(created, tokenHolder?.id)
+    } catch (err) {
+      console.error('[TicketService:create activity]', err)
+    }
 
     try {
       const sent = new Set<string>()
@@ -76,14 +118,29 @@ export class TicketService {
     return created
   }
 
-  async update(body: any) {
+  async update(body: any, tokenHolder?: any) {
     const id = body.id
     if (!id) throw new Exception({ message: 'id is required', httpResponseCode: 422 })
 
     const ticketBefore = await repo.findById(id)
     const oldAssignedTo = ticketBefore.assigned_to
+    const beforeValues: Record<string, any> = {}
+    for (const field of TRACKED_FIELDS) {
+      beforeValues[field] = (ticketBefore as any)[field]
+    }
 
-    const ticket = await repo.update(body)
+    const customInputs = extractCustomInputs(body)
+    await repo.update(body)
+    if (customInputs) {
+      await fieldService.persistEntries(Number(id), customInputs, true)
+    }
+    const ticket = await repo.findById(id)
+
+    try {
+      await this.logTicketUpdates(ticket, beforeValues, body, tokenHolder?.id)
+    } catch (err) {
+      console.error('[TicketService:update activity]', err)
+    }
 
     try {
       const data = await this.ticketMailData(ticket)
@@ -125,6 +182,12 @@ export class TicketService {
 
   async addComment(data: { ticket_id: number; body?: string; details?: string; user_id?: number; contact_id?: number }) {
     const comment = await repo.addComment(data)
+    try {
+      const ticket = await repo.findById(data.ticket_id)
+      await logTicketComment(ticket, comment.id, data.user_id)
+    } catch (err) {
+      console.error('[TicketService:comment activity]', err)
+    }
 
     try {
       const ticket = await repo.findById(data.ticket_id)
@@ -159,6 +222,26 @@ export class TicketService {
 
   removeFavorite(userId: number, ticketId: number) {
     return repo.removeFavorite(userId, ticketId)
+  }
+
+  getActivities(ticketId: number | string) {
+    return repo.getActivities(ticketId)
+  }
+
+  private async logTicketUpdates(ticket: any, beforeValues: Record<string, any>, body: any, userId?: number) {
+    for (const field of TRACKED_FIELDS) {
+      if (body[field] === undefined && !(field === 'details' && body.body !== undefined)) continue
+      const oldVal = field.endsWith('_id') || field === 'assigned_to' ? toId(beforeValues[field]) : beforeValues[field]
+      const newVal = field.endsWith('_id') || field === 'assigned_to' ? toId(ticket[field]) : ticket[field]
+      if (String(oldVal ?? '') === String(newVal ?? '')) continue
+      if (field === 'assigned_to') {
+        await logTicketAssignment(ticket, oldVal, newVal, userId)
+      } else if (field === 'status_id') {
+        await logTicketStatusChange(ticket, oldVal, newVal, userId)
+      } else {
+        await logTicketFieldChange(ticket, field, oldVal, newVal, userId)
+      }
+    }
   }
 
   private async ticketMailData(ticket: any) {

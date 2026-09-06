@@ -246,6 +246,27 @@
 
 /**
  * @swagger
+ * /ticket/activities:
+ *   get:
+ *     summary: List ticket activity timeline
+ *     tags: [Ticket]
+ *     parameters:
+ *       - in: query
+ *         name: ticket_id
+ *         required: true
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Ticket activities fetched successfully
+ *       401:
+ *         description: Unauthenticated
+ *       404:
+ *         description: Record not found
+ */
+
+/**
+ * @swagger
  * /ticket/comments:
  *   get:
  *     summary: List ticket comments
