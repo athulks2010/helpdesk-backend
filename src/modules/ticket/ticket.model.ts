@@ -107,6 +107,7 @@ export const initTicketModel = () => {
       response: DataTypes.DATE,
       user_id: DataTypes.INTEGER,
       contact_id: DataTypes.INTEGER,
+      email: DataTypes.STRING,
       created_by: DataTypes.STRING,
       priority_id: DataTypes.INTEGER,
       department_id: DataTypes.INTEGER,
