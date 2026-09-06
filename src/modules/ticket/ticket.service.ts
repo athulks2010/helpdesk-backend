@@ -25,9 +25,31 @@ export class TicketService {
       const email = await repo.getTicketEmail(ticket)
       if (email) {
         await mailService.sendTemplate('create_ticket_new_customer', email, {
-          ticket_id: ticket.uid,
-          subject: ticket.subject,
+          ticket,
+          type: (ticket as any).type?.name,
         })
+      }
+
+      // Notify all admins
+      const admins = await User.findAll({ where: { role_id: 1 } })
+      for (const admin of admins) {
+        if (admin.email) {
+          await mailService.sendTemplate('create_ticket_admin', admin.email, {
+            ticket,
+            type: (ticket as any).type?.name,
+          })
+        }
+      }
+
+      // Notify assigned user if provided during creation
+      if (ticket.assigned_to) {
+        const assignee = await User.findByPk(ticket.assigned_to)
+        if (assignee && assignee.email) {
+          await mailService.sendTemplate('assigned_ticket', assignee.email, {
+            ticket,
+            type: (ticket as any).type?.name,
+          })
+        }
       }
     } catch (err) {
       console.error('[TicketService:create mail]', err)
@@ -59,7 +81,8 @@ export class TicketService {
       const email = await repo.getTicketEmail(ticket)
       if (email) {
         await mailService.sendTemplate('ticket_updated', email, {
-          ticket
+          ticket,
+          type: (ticket as any).type?.name,
         })
       }
     } catch (err) {
@@ -85,9 +108,8 @@ export class TicketService {
       const email = await repo.getTicketEmail(ticket)
       if (email) {
         await mailService.sendTemplate('ticket_new_comment', email, {
-          ticket_id: ticket.uid,
-          subject: ticket.subject,
-          comment: comment.details,
+          ticket,
+          type: (ticket as any).type?.name,
         })
       }
     } catch (err) {
