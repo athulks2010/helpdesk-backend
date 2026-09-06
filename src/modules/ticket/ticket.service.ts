@@ -28,6 +28,7 @@ export class TicketService {
           uid: ticket.uid,
           subject: ticket.subject,
           type: (ticket as any).type?.name,
+          url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
         })
       }
 
@@ -39,6 +40,7 @@ export class TicketService {
             uid: ticket.uid,
             subject: ticket.subject,
             type: (ticket as any).type?.name,
+            url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
           })
         }
       }
@@ -51,6 +53,7 @@ export class TicketService {
             uid: ticket.uid,
             subject: ticket.subject,
             type: (ticket as any).type?.name,
+            url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
           })
         }
       }
@@ -78,6 +81,7 @@ export class TicketService {
             uid: ticket.uid,
             subject: ticket.subject,
             type: (ticket as any).type?.name,
+            url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
           })
         }
       }
@@ -88,6 +92,7 @@ export class TicketService {
           uid: ticket.uid,
           subject: ticket.subject,
           type: (ticket as any).type?.name,
+          url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
         })
       }
     } catch (err) {
@@ -116,6 +121,8 @@ export class TicketService {
           uid: ticket.uid,
           subject: ticket.subject,
           type: (ticket as any).type?.name,
+          name: (ticket as any).user?.first_name || (ticket as any).contact?.first_name || '',
+          url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
         })
       }
     } catch (err) {
