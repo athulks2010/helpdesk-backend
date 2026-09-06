@@ -7,20 +7,39 @@ export class EmailTemplate extends Model {
   declare details?: string
   declare slug?: string
   declare language?: string
-  declare subject?: string
-  declare body?: string
+  declare html?: string
+
+  get subject() {
+    return this.getDataValue('name')
+  }
+  set subject(val: any) {
+    this.setDataValue('name', val)
+  }
+
+  get body() {
+    return this.getDataValue('html')
+  }
+  set body(val: any) {
+    this.setDataValue('html', val)
+  }
+
+  toJSON() {
+    const values: any = super.toJSON()
+    values.subject = this.getDataValue('name')
+    values.body = this.getDataValue('html')
+    return values
+  }
 }
 
 export const initEmailTemplateModel = () => {
   EmailTemplate.init(
     {
-      id: { type: DataTypes.BIGINT.UNSIGNED, autoIncrement: true, primaryKey: true },
-      name: DataTypes.STRING,
-      details: DataTypes.TEXT,
-      slug: DataTypes.STRING,
-      language: DataTypes.STRING,
-      subject: DataTypes.STRING,
-      body: DataTypes.TEXT,
+      id: { type: DataTypes.INTEGER.UNSIGNED, autoIncrement: true, primaryKey: true },
+      name: DataTypes.STRING(50),
+      details: DataTypes.STRING(200),
+      slug: DataTypes.STRING(50),
+      language: DataTypes.STRING(10),
+      html: DataTypes.TEXT,
     },
     {
       sequelize: getSequelize(),

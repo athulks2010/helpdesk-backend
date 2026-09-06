@@ -8,14 +8,16 @@ export class EmailTemplateRepository {
     try {
       const pageNumber = parseInt(query?.pageNumber, 10) || 1
       const pageSize = parseInt(query?.pageSize, 10) || 10
-      const sortField = query?.sortField || 'id'
+      let sortField = query?.sortField || 'id'
+      if (sortField === 'subject') sortField = 'name'
+      if (sortField === 'body') sortField = 'html'
       const sortOrder = (query?.sortOrder || 'asc').toLowerCase() === 'desc' ? 'DESC' : 'ASC'
       const where: any = {}
 
     if (query?.searchText) {
       where[Op.or] = [
         { name: { [Op.like]: `%${query.searchText}%` } },
-        { subject: { [Op.like]: `%${query.searchText}%` } },
+        { details: { [Op.like]: `%${query.searchText}%` } },
         { slug: { [Op.like]: `%${query.searchText}%` } },
       ]
     }
@@ -23,7 +25,9 @@ export class EmailTemplateRepository {
       const reserved = ['pageNumber', 'pageSize', 'sortField', 'sortOrder', 'searchText']
       for (const key of Object.keys(query || {})) {
         if (!reserved.includes(key) && query[key] !== undefined && query[key] !== '') {
-          where[key] = query[key]
+          if (key === 'subject') where.name = query[key]
+          else if (key === 'body') where.html = query[key]
+          else where[key] = query[key]
         }
       }
 
@@ -51,9 +55,22 @@ export class EmailTemplateRepository {
     return item
   }
 
+  mapPayload(body: any) {
+    const payload = { ...body }
+    if (payload.body !== undefined && payload.html === undefined) {
+      payload.html = payload.body
+    }
+    if (payload.subject !== undefined && payload.name === undefined) {
+      payload.name = payload.subject
+    }
+    delete payload.body
+    delete payload.subject
+    return payload
+  }
+
   async create(body: any) {
     try {
-      return await EmailTemplate.create(body)
+      return await EmailTemplate.create(this.mapPayload(body))
     } catch (err: any) {
       throw new Exception(err)
     }
@@ -63,7 +80,7 @@ export class EmailTemplateRepository {
     try {
       const id = body?.id
       const item = await this.findById(id)
-      await item.update(body)
+      await item.update(this.mapPayload(body))
       return item
     } catch (err: any) {
       if (err instanceof Exception) throw err
