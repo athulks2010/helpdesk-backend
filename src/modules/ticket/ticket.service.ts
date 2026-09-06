@@ -123,6 +123,7 @@ export class TicketService {
           type: (ticket as any).type?.name,
           name: (ticket as any).user?.first_name || (ticket as any).contact?.first_name || '',
           url: `${process.env.APP_URL || ''}/tickets/${ticket.id}/edit`,
+          comment: (comment as any).details || '',
         })
       }
     } catch (err) {
