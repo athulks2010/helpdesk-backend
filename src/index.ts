@@ -35,6 +35,7 @@ import { aiWithMiddleware } from './modules/ai/ai.routes'
 import { fileUploadWithMiddleware } from './modules/file-upload/file-upload.routes'
 import { notificationWithMiddleware } from './modules/notification/notification.routes'
 import { publicRouter } from './modules/public/public.routes'
+import { country, countryWithMiddleware } from './modules/country/country.routes'
 
 const bootstrap = async () => {
   // Load env via side-effect of app import, then connect DB + models before routes
@@ -75,6 +76,8 @@ const bootstrap = async () => {
   app.use('/setting', authenticationMiddleware, settingWithMiddleware.router)
   app.use('/language', language.router)
   app.use('/language', authenticationMiddleware, languageWithMiddleware.router)
+  app.use('/country', country.router)
+  app.use('/country', authenticationMiddleware, countryWithMiddleware.router)
   app.use('/email-template', authenticationMiddleware, emailTemplateWithMiddleware.router)
   app.use('/navigation-menu', navigationMenu.router)
   app.use('/navigation-menu', authenticationMiddleware, navigationMenuWithMiddleware.router)
