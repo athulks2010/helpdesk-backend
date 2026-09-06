@@ -9,7 +9,6 @@ import { Status } from '../status/status.model'
 import { Priority } from '../priority/priority.model'
 import { Department } from '../department/department.model'
 import { Type } from '../type/type.model'
-import { mailService } from '../../utils/mail'
 
 const defaultIncludes = [
   { model: Status, as: 'status', attributes: ['id', 'name'] },
@@ -98,7 +97,7 @@ export class TicketRepository {
     return payload
   }
 
-  private async getTicketEmail(ticket: any) {
+  async getTicketEmail(ticket: any) {
     if (ticket.user_id) {
       const user = await User.findByPk(ticket.user_id)
       return user?.email
@@ -118,23 +117,7 @@ export class TicketRepository {
 
   async create(body: any) {
     const payload = this.mapTicketPayload(body)
-    if (!payload.uid) {
-      payload.uid = String(Math.floor(100000 + Math.random() * 900000))
-    }
     const ticket = await Ticket.create(payload)
-
-    try {
-      const email = await this.getTicketEmail(ticket)
-      if (email) {
-        await mailService.sendTemplate('create_ticket_new_customer', email, {
-          ticket_id: ticket.uid,
-          subject: ticket.subject,
-        })
-      }
-    } catch (err) {
-      console.error('[TicketRepo:create mail]', err)
-    }
-
     return ticket
   }
 
@@ -142,33 +125,9 @@ export class TicketRepository {
     const id = body.id
     if (!id) throw new Exception({ message: 'id is required', httpResponseCode: 422 })
     const ticket = await this.findById(id)
-    
-    const oldAssignedTo = ticket.assigned_to
 
     const payload = this.mapTicketPayload(body)
     await ticket.update(payload)
-
-    try {
-      if (payload.assigned_to && payload.assigned_to !== oldAssignedTo) {
-        const assignee = await User.findByPk(payload.assigned_to)
-        if (assignee && assignee.email) {
-          await mailService.sendTemplate('assigned_ticket', assignee.email, {
-            ticket_id: ticket.uid,
-            subject: ticket.subject,
-          })
-        }
-      }
-
-      const email = await this.getTicketEmail(ticket)
-      if (email) {
-        await mailService.sendTemplate('ticket_updated', email, {
-          ticket_id: ticket.uid,
-          subject: ticket.subject,
-        })
-      }
-    } catch (err) {
-      console.error('[TicketRepo:update mail]', err)
-    }
 
     return ticket
   }
@@ -193,20 +152,6 @@ export class TicketRepository {
     }
     delete payload.body
     const comment = await Comment.create(payload)
-
-    try {
-      const ticket = await this.findById(payload.ticket_id)
-      const email = await this.getTicketEmail(ticket)
-      if (email) {
-        await mailService.sendTemplate('ticket_new_comment', email, {
-          ticket_id: ticket.uid,
-          subject: ticket.subject,
-          comment: payload.details,
-        })
-      }
-    } catch (err) {
-      console.error('[TicketRepo:comment mail]', err)
-    }
 
     return comment
   }
