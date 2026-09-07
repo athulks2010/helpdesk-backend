@@ -3,8 +3,8 @@ import { TicketService } from './ticket.service'
 export class TicketController {
   private service = new TicketService()
 
-  async all(query: any) {
-    return this.service.findAll(query)
+  async all(query: any, tokenHolder?: any) {
+    return this.service.findAll(query, tokenHolder)
   }
 
   async single(query: any) {

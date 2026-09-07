@@ -47,8 +47,8 @@ const toId = (val: any): number | null => {
 }
 
 export class TicketService {
-  findAll(query: any) {
-    return repo.findAll(query)
+  findAll(query: any, tokenHolder?: any) {
+    return repo.findAll(query, tokenHolder)
   }
 
   findById(id: number | string) {

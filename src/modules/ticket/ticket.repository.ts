@@ -31,7 +31,7 @@ const defaultIncludes = [
 ]
 
 export class TicketRepository {
-  async findAll(query: any = {}) {
+  async findAll(query: any = {}, tokenHolder?: any) {
     const pageNumber = parseInt(query.pageNumber, 10) || 1
     const pageSize = parseInt(query.pageSize, 10) || 20
     const offset = (pageNumber - 1) * pageSize
@@ -48,6 +48,25 @@ export class TicketRepository {
         { uid: { [Op.like]: `%${query.searchText}%` } },
         { details: { [Op.like]: `%${query.searchText}%` } },
       ]
+    }
+
+    if (tokenHolder && tokenHolder.role_id === 2) {
+      const userCondition = {
+        [Op.or]: [
+          { user_id: tokenHolder.id },
+          { contact_id: tokenHolder.id }
+        ]
+      }
+      
+      if (where[Op.or]) {
+        where[Op.and] = [
+          { [Op.or]: where[Op.or] },
+          userCondition
+        ]
+        delete where[Op.or]
+      } else {
+        where[Op.or] = userCondition[Op.or]
+      }
     }
 
     const sortField = query.sortField || 'id'

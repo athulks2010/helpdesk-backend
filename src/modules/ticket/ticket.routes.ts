@@ -4,7 +4,7 @@ import { Router } from '../../core'
 const ticketController = new TicketController()
 
 export const ticketWithMiddleware = new Router()
-ticketWithMiddleware.get('/all', async (req) => ticketController.all(req.query))
+ticketWithMiddleware.get('/all', async (req) => ticketController.all(req.query, (req as any).tokenHolder))
 ticketWithMiddleware.get('/single', async (req) => ticketController.single(req.query))
 ticketWithMiddleware.post('/create', async (req) =>
   ticketController.create(req.body, (req as any).tokenHolder)
