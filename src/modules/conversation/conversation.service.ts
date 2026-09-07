@@ -4,34 +4,54 @@ import { getPusher } from '../../utils/pusher'
 const repo = new ConversationRepository()
 
 export class ConversationService {
-  findAll(query: any) {
-    return repo.findAll(query)
+  findAll(query: any, tokenHolder?: any) {
+    return repo.findAll(query, tokenHolder)
   }
 
-  findById(id: number | string) {
-    return repo.findById(id)
+  findById(id: number | string, tokenHolder?: any) {
+    return repo.findById(id, tokenHolder)
   }
 
-  create(body: any) {
-    return repo.create(body)
+  async create(body: any, tokenHolder?: any) {
+    const conversation = await repo.create(body, tokenHolder)
+    try {
+      if (conversation.ticket_id) {
+        const pusher = getPusher()
+        if (pusher) {
+          const rawConv = typeof (conversation as any).toJSON === 'function' ? (conversation as any).toJSON() : conversation
+          const channelName = `ticket.${conversation.ticket_id}`
+          await pusher.trigger(channelName, 'ConversationCreated', {
+            conversation: rawConv,
+            ...rawConv,
+          })
+          console.log(`[Pusher] Broadcasted ConversationCreated to ${channelName}`)
+        }
+      }
+    } catch (err) {
+      console.error('[Pusher:ConversationCreated error]', err)
+    }
+    return conversation
   }
 
-  update(body: any) {
-    return repo.update(body)
+  update(body: any, tokenHolder?: any) {
+    return repo.update(body, tokenHolder)
   }
 
-  destroy(id: number | string) {
-    return repo.destroy(id)
+  destroy(id: number | string, tokenHolder?: any) {
+    return repo.destroy(id, tokenHolder)
   }
 
-  async sendMessage(data: {
-    conversation_id: number
-    message: string
-    user_id?: number
-    contact_id?: number
-    attachments?: Array<{ name?: string; path?: string; mime?: string; size?: number }>
-  }) {
-    const msg = await repo.sendMessage(data)
+  async sendMessage(
+    data: {
+      conversation_id: number
+      message: string
+      user_id?: number
+      contact_id?: number
+      attachments?: Array<{ name?: string; path?: string; mime?: string; size?: number }>
+    },
+    tokenHolder?: any
+  ) {
+    const msg = await repo.sendMessage(data, tokenHolder)
     try {
       const pusher = getPusher()
       if (pusher) {
@@ -79,8 +99,8 @@ export class ConversationService {
     return msg
   }
 
-  getMessages(conversationId: number | string, query: any = {}) {
-    return repo.getMessages(conversationId, query)
+  getMessages(conversationId: number | string, query: any = {}, tokenHolder?: any) {
+    return repo.getMessages(conversationId, query, tokenHolder)
   }
 
   markRead(conversationId: number | string, userId?: number) {

@@ -7,7 +7,10 @@ import { FrontPage } from '../front-page/front-page.model'
 import { TicketService } from '../ticket/ticket.service'
 import { Conversation } from '../conversation/conversation.model'
 import { Message } from '../conversation/message.model'
+import { Participant } from '../conversation/participant.model'
+import { MessageAttachment } from '../conversation/message-attachment.model'
 import { Contact } from '../contact/contact.model'
+import { User } from '../user/user.model'
 import { getPusher } from '../../utils/pusher'
 
 /** Public landing / open-ticket / chat init (no auth) */
@@ -85,10 +88,67 @@ publicRouter.post('/chat/init', async (req) => {
       } as any)
     }
   }
-  const conversation = await Conversation.create({
-    contact_id: contact?.id,
-    subject: body.subject || 'Public chat',
-  } as any)
+
+  // Flow B Parity: Check if contact already has an active conversation
+  let conversation = null as Conversation | null
+  if (contact) {
+    conversation = await Conversation.findOne({
+      where: { contact_id: contact.id, status: 'active' },
+      order: [['id', 'DESC']],
+    })
+  }
+
+  if (!conversation) {
+    conversation = await Conversation.create({
+      contact_id: contact?.id,
+      title: body.subject || body.title || 'Live Support Chat',
+      type: 'customer',
+      source: 'website',
+      status: 'active',
+      priority: body.priority || 'medium',
+      department: body.department || 'general',
+    } as any)
+
+    // Assign available admin to Participant
+    const admin = await User.findOne({ where: { role_id: 1 } })
+    if (admin) {
+      await Participant.create({
+        conversation_id: conversation.id,
+        user_id: admin.id,
+        contact_id: contact?.id,
+      } as any)
+    }
+
+    // Auto welcome message
+    const welcomeMsg = await Message.create({
+      conversation_id: conversation.id,
+      message: 'Hello! Welcome to our support chat. An agent will be with you shortly.',
+      is_read: false,
+      user_id: admin?.id,
+    } as any)
+
+    const pusher = getPusher()
+    if (pusher) {
+      const payload = {
+        chatMessage: {
+          id: welcomeMsg.id,
+          conversation_id: conversation.id,
+          message: welcomeMsg.message,
+          created_at: (welcomeMsg as any).createdAt || new Date().toISOString(),
+          user: admin ? { id: admin.id, first_name: admin.first_name, last_name: admin.last_name } : null,
+          contact: null,
+          attachments: [],
+        },
+        ...welcomeMsg.toJSON(),
+      }
+      try {
+        await pusher.trigger(`chat.${conversation.id}`, 'NewChatMessage', payload)
+      } catch (e) {
+        /* silent */
+      }
+    }
+  }
+
   return {
     conversation: conversation.toJSON(),
     contact: contact?.toJSON(),
@@ -101,6 +161,11 @@ publicRouter.get('/chat/conversation', async (req) => {
   const conversation = await Conversation.findByPk(id)
   const messages = await Message.findAll({
     where: { conversation_id: id },
+    include: [
+      { model: User, as: 'user', attributes: ['id', 'first_name', 'last_name', 'email', 'photo_path'] },
+      { model: Contact, as: 'contact', attributes: ['id', 'first_name', 'last_name', 'email'] },
+      { model: MessageAttachment, as: 'attachments' },
+    ],
     order: [['id', 'ASC']],
   })
   return { conversation, messages, message: 'OK' }
@@ -114,9 +179,44 @@ publicRouter.post('/chat/send-message', async (req) => {
     message: body.message,
     is_read: false,
   } as any)
+
+  await Conversation.update(
+    { last_message_at: new Date(), last_activity: new Date() },
+    { where: { id: body.conversation_id } }
+  )
+
+  const fullMsg = await Message.findByPk(msg.id, {
+    include: [
+      { model: User, as: 'user', attributes: ['id', 'first_name', 'last_name', 'email', 'photo_path'] },
+      { model: Contact, as: 'contact', attributes: ['id', 'first_name', 'last_name', 'email'] },
+      { model: MessageAttachment, as: 'attachments' },
+    ],
+  })
+
+  const rawJson: any = fullMsg?.toJSON ? fullMsg.toJSON() : msg.toJSON()
+  const payload = {
+    chatMessage: {
+      id: rawJson.id,
+      conversation_id: rawJson.conversation_id,
+      message: rawJson.message,
+      contact_id: rawJson.contact_id,
+      created_at: rawJson.created_at || rawJson.createdAt,
+      user: null,
+      contact: rawJson.contact || null,
+      attachments: rawJson.attachments || [],
+    },
+    ...rawJson,
+  }
+
   const pusher = getPusher()
   if (pusher) {
-    await pusher.trigger(`chat.${body.conversation_id}`, 'NewPublicChatMessage', msg.toJSON())
+    try {
+      await pusher.trigger(`chat.${body.conversation_id}`, 'NewChatMessage', payload)
+      await pusher.trigger(`chat.${body.conversation_id}`, 'NewPublicChatMessage', payload)
+    } catch (e) {
+      /* silent */
+    }
   }
-  return { ...msg.toJSON(), message: 'Sent' }
+
+  return { ...(fullMsg ? fullMsg.toJSON() : msg.toJSON()), message: 'Sent' }
 })
