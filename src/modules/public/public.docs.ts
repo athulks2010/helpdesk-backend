@@ -141,9 +141,38 @@
 
 /**
  * @swagger
+ * /public/contact:
+ *   post:
+ *     summary: Add a contact
+ *     tags: [Public]
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               first_name:
+ *                 type: string
+ *               last_name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               phone:
+ *                 type: string
+ *               message:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Contact created successfully
+ */
+
+/**
+ * @swagger
  * /public/subscribe/news:
  *   post:
- *     summary: Subscribe to newsletter
+ *     summary: Subscribe to newsletter (stores email in contacts)
  *     tags: [Public]
  *     security: []
  *     requestBody:
@@ -159,7 +188,9 @@
  *                 example: guest@example.com
  *     responses:
  *       200:
- *         description: Subscribed
+ *         description: Email stored in contacts. No newsletter email is sent.
+ *       400:
+ *         description: Invalid email or newsletter disabled
  */
 
 /**

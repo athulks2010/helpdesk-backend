@@ -36,8 +36,8 @@ export const initContactModel = () => {
   Contact.init(
     {
       id: { type: DataTypes.BIGINT.UNSIGNED, autoIncrement: true, primaryKey: true },
-      first_name: DataTypes.STRING,
-      last_name: DataTypes.STRING,
+      first_name: { type: DataTypes.STRING, allowNull: true },
+      last_name: { type: DataTypes.STRING, allowNull: true },
       email: { type: DataTypes.STRING, allowNull: false },
       phone: DataTypes.STRING,
       organization_id: DataTypes.BIGINT.UNSIGNED,

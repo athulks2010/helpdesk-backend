@@ -84,6 +84,7 @@ export class TicketService {
           ...data,
           name: requester.name,
           email: requester.email,
+          ...(body.source === 'public' && body.password ? { password: body.password } : {}),
         })
         sent.add(requester.email.toLowerCase())
       }
