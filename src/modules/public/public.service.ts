@@ -7,6 +7,9 @@ import { TicketService } from '../ticket/ticket.service'
 import { ConversationRepository } from '../conversation/conversation.repository'
 import { ContactRepository } from '../contact/contact.repository'
 import { UserRepository } from '../user/user.repository'
+import { SettingRepository } from '../setting/setting.repository'
+import { Contact } from '../contact/contact.model'
+import { Exception } from '../../core'
 import { getPusher } from '../../utils/pusher'
 
 export class PublicService {
@@ -84,7 +87,51 @@ export class PublicService {
   }
 
   async subscribeNews(email: string) {
-    return { email, message: 'Subscribed' }
+    const value = String(email || '').trim()
+    if (!value) {
+      throw new Exception({ message: 'Email is required', httpResponseCode: 400 })
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      throw new Exception({ message: 'A valid email is required', httpResponseCode: 400 })
+    }
+    if (value.length > 50) {
+      throw new Exception({ message: 'Email must be 50 characters or fewer', httpResponseCode: 400 })
+    }
+
+    const newsletterEnabled = await this.isNewsletterEnabled()
+    if (!newsletterEnabled) {
+      throw new Exception({ message: 'Newsletter is disabled', httpResponseCode: 400 })
+    }
+
+    const contact = await Contact.create({
+      email: value,
+      first_name: null,
+      last_name: null,
+    } as any)
+
+    return {
+      id: contact.id,
+      email: contact.email,
+      first_name: contact.first_name ?? null,
+      last_name: contact.last_name ?? null,
+      message: 'You just subscribed for the latest news. Thank You!',
+    }
+  }
+
+  private async isNewsletterEnabled() {
+    try {
+      const setting = await new SettingRepository().findBySlug('enable_options')
+      let options: any = setting?.value
+      if (typeof options === 'string') {
+        options = JSON.parse(options)
+      }
+      if (!Array.isArray(options)) return false
+      const item = options.find((option: any) => option?.slug === 'newsletter')
+      if (!item) return false
+      return item.value === true || item.value === 1 || item.value === '1' || item.value === 'true'
+    } catch {
+      return false
+    }
   }
 
   async initChat(body: any) {
