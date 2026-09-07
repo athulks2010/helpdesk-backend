@@ -3,19 +3,19 @@ import { DashboardService } from './dashboard.service'
 export class DashboardController {
   private service = new DashboardService()
 
-  metrics() {
-    return this.service.metrics()
+  metrics(tokenHolder?: any) {
+    return this.service.metrics(tokenHolder)
   }
 
-  analytics() {
-    return this.service.analytics()
+  analytics(tokenHolder?: any) {
+    return this.service.analytics(tokenHolder)
   }
 
-  performance() {
-    return this.service.performance()
+  performance(tokenHolder?: any) {
+    return this.service.performance(tokenHolder)
   }
 
-  charts() {
-    return this.service.charts()
+  charts(tokenHolder?: any) {
+    return this.service.charts(tokenHolder)
   }
 }

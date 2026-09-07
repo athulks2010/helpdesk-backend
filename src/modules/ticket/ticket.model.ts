@@ -26,6 +26,8 @@ export class Ticket extends Model {
   declare template_id?: number
   declare sla_policy_id?: number
   declare details?: string
+  declare created_at?: Date
+  declare updated_at?: Date
 
   // Aliases for backwards compatibility
   get uuid() {

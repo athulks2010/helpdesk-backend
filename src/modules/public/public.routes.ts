@@ -13,6 +13,10 @@ import { MessageAttachment } from '../conversation/message-attachment.model'
 import { Contact } from '../contact/contact.model'
 import { User } from '../user/user.model'
 import { getPusher } from '../../utils/pusher'
+import { Department } from '../department/department.model'
+import { Category } from '../category/category.model'
+import { Priority } from '../priority/priority.model'
+import { TicketField } from '../ticket-field/ticket-field.model'
 
 /** Public landing / open-ticket / chat init (no auth) */
 export const publicRouter = new Router()
@@ -56,19 +60,74 @@ publicRouter.get('/front-page', async (req) => {
   return { ...(row?.toJSON() || {}), message: 'OK' }
 })
 
+publicRouter.get('/ticket/form-data', async () => {
+  const [departments, categories, priorities, types, customFields] = await Promise.all([
+    Department.findAll({ order: [['name', 'ASC']] }),
+    Category.findAll({ order: [['name', 'ASC']] }),
+    Priority.findAll({ order: [['id', 'ASC']] }),
+    Type.findAll({ order: [['name', 'ASC']] }),
+    TicketField.findAll({ order: [['id', 'ASC']] }),
+  ])
+  return {
+    departments,
+    categories,
+    all_categories: categories,
+    priorities,
+    types,
+    custom_fields: customFields,
+    message: 'OK',
+  }
+})
+
+publicRouter.get('/departments', async () => {
+  const items = await Department.findAll({ order: [['name', 'ASC']] })
+  return { items, totalCount: items.length, message: 'OK' }
+})
+
+publicRouter.get('/categories', async () => {
+  const items = await Category.findAll({ order: [['name', 'ASC']] })
+  return { items, totalCount: items.length, message: 'OK' }
+})
+
+publicRouter.get('/priorities', async () => {
+  const items = await Priority.findAll({ order: [['id', 'ASC']] })
+  return { items, totalCount: items.length, message: 'OK' }
+})
+
+publicRouter.get('/types', async () => {
+  const items = await Type.findAll({ order: [['name', 'ASC']] })
+  return { items, totalCount: items.length, message: 'OK' }
+})
+
 publicRouter.post('/ticket/open', async (req) => {
   const body = req.body || {}
+
+  let contactId = body.contact_id
+  if (!contactId && body.email) {
+    let contact = await Contact.findOne({ where: { email: body.email } })
+    if (!contact) {
+      contact = await Contact.create({
+        first_name: body.first_name || '',
+        last_name: body.last_name || '',
+        email: body.email,
+      } as any)
+    }
+    contactId = contact.id
+  }
+
   const ticket = await new TicketService().create({
     subject: body.subject,
     details: body.details || body.body || body.message,
     user_id: body.user_id,
-    contact_id: body.contact_id,
+    contact_id: contactId,
     email: body.email,
     status_id: body.status_id,
     priority_id: body.priority_id,
     department_id: body.department_id,
     category_id: body.category_id,
+    sub_category_id: body.sub_category_id,
     type_id: body.type_id,
+    custom_field: body.custom_field || body.custom_fields,
     source: 'public',
   })
   return { ...ticket.toJSON(), message: 'Ticket opened' }
