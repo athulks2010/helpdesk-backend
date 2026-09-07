@@ -3,6 +3,7 @@ import { mailService } from '../../utils/mail'
 import { TicketFieldService } from '../ticket-field/ticket-field.service'
 import { Type } from '../type/type.model'
 import { User } from '../user/user.model'
+import { Attachment } from './attachment.model'
 import {
   logTicketAssignment,
   logTicketComment,
@@ -51,8 +52,20 @@ export class TicketService {
     return repo.findAll(query, tokenHolder)
   }
 
-  findById(id: number | string) {
-    return repo.findById(id)
+  async findById(id: number | string) {
+    const ticket = await repo.findById(id)
+    try {
+
+      const attachments = await Attachment.findAll({ where: { ticket_id: id } })
+      if (ticket.setDataValue) {
+        ticket.setDataValue('attachments', attachments)
+      } else {
+        (ticket as any).attachments = attachments
+      }
+    } catch (err) {
+      console.error('[TicketService:findById attachments]', err)
+    }
+    return ticket
   }
 
   async create(body: any, tokenHolder?: any) {
