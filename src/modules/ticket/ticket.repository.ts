@@ -57,7 +57,7 @@ export class TicketRepository {
           { contact_id: tokenHolder.id }
         ]
       }
-      
+
       if (where[Op.or]) {
         where[Op.and] = [
           { [Op.or]: where[Op.or] },
@@ -148,7 +148,7 @@ export class TicketRepository {
       if (user?.email) {
         return {
           email: user.email,
-          name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.email,
+          name: `${user.first_name || ''} ${user.last_name || ''}`.trim(),
         }
       }
     }
@@ -158,7 +158,7 @@ export class TicketRepository {
       if (contact?.email) {
         return {
           email: contact.email,
-          name: `${contact.first_name || ''} ${contact.last_name || ''}`.trim() || contact.email,
+          name: `${contact.first_name || ''} ${contact.last_name || ''}`.trim(),
         }
       }
     }
@@ -242,18 +242,18 @@ export class TicketRepository {
       if (ticketId) throw new Exception({ message: 'Favorite not found', httpResponseCode: 404 })
       return { items: [], totalCount: 0, message: 'Favorites fetched successfully' }
     }
-    
+
     const { rows, count } = await Ticket.findAndCountAll({
       where: { id: ticketIds },
       include: defaultIncludes,
       order: [['id', 'DESC']]
     })
-    
+
     if (ticketId) {
       if (rows.length === 0) throw new Exception({ message: 'Favorite not found', httpResponseCode: 404 })
       return { item: rows[0], message: 'Favorite fetched successfully' }
     }
-    
+
     return { items: rows, totalCount: count, message: 'Favorites fetched successfully' }
   }
 

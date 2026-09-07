@@ -121,6 +121,11 @@ const roleAccess = {
   },
 }
 
+function loadJson<T>(fileName: string): T {
+  const jsonPath = path.join(__dirname, 'seed-data', fileName)
+  return JSON.parse(fs.readFileSync(jsonPath, 'utf8')) as T
+}
+
 function loadCountries() {
   const jsonPath = path.join(__dirname, 'seed-data', 'countries.json')
   if (fs.existsSync(jsonPath)) {
@@ -182,6 +187,7 @@ async function seedRoles() {
 }
 
 async function seedLanguages() {
+  if ((await prisma.language.count()) > 0) return
   const languages = [
     { name: 'English', code: 'en', flag: 'us', is_default: true },
     { name: 'German', code: 'de', flag: 'de' },
@@ -206,6 +212,7 @@ async function seedLanguages() {
 }
 
 async function seedSettings() {
+  if ((await prisma.setting.count()) > 0) return
   const enableOptions = [
     { name: 'Chat', slug: 'chat', value: false },
     { name: 'FAQ', slug: 'faq', value: true },
@@ -257,6 +264,7 @@ async function seedSettings() {
 }
 
 async function seedTicketTaxonomy() {
+  if ((await prisma.department.count()) > 0) return
   await prisma.department.createMany({
     data: [
       { id: 1n, name: 'Sales' },
@@ -388,6 +396,8 @@ async function seedEmailTemplates() {
     },
   ]
 
+  if ((await prisma.emailTemplate.count()) > 0) return
+
   await prisma.emailTemplate.createMany({
     data: templates.map((t) => ({
       name: t.name,
@@ -401,6 +411,7 @@ async function seedEmailTemplates() {
 }
 
 async function seedFrontPages() {
+  if ((await prisma.frontPage.count()) > 0) return
   const pages = [
     {
       title: 'Home',
@@ -474,6 +485,7 @@ async function seedFrontPages() {
 }
 
 async function seedNavigationMenus() {
+  if ((await prisma.navigationMenu.count()) > 0) return
   await prisma.navigationMenu.createMany({
     data: [
       { label: 'Home', url: '/', sort_order: 1 },
@@ -487,6 +499,7 @@ async function seedNavigationMenus() {
 }
 
 async function seedMediaFolders() {
+  if ((await prisma.mediaFolder.count()) > 0) return
   await prisma.mediaFolder.create({
     data: { id: 1n, name: 'System Media Holder', parent_id: null },
   })
@@ -522,6 +535,60 @@ async function seedAdminUser() {
   })
 }
 
+async function seedServices() {
+  const services = loadJson<
+    {
+      title: string
+      slug: string
+      icon: string
+      is_active: number
+      image: string | null
+      details: string
+    }[]
+  >('services.json')
+
+  for (const service of services) {
+    await prisma.service.upsert({
+      where: { slug: service.slug },
+      update: service,
+      create: service,
+    })
+  }
+}
+
+async function seedKnowledgeBase() {
+  const articles = loadJson<
+    {
+      title: string
+      category: string
+      views: number
+      helpful: number
+      created_at: string
+      details: string
+    }[]
+  >('knowledge-base.json')
+
+  for (const article of articles) {
+    const data = {
+      title: article.title,
+      category: article.category,
+      views: article.views,
+      helpful: article.helpful,
+      created_at: new Date(article.created_at),
+      details: article.details,
+    }
+    const existing = await prisma.knowledgeBase.findFirst({ where: { title: article.title } })
+    if (existing) {
+      await prisma.knowledgeBase.update({
+        where: { id: existing.id },
+        data,
+      })
+    } else {
+      await prisma.knowledgeBase.create({ data })
+    }
+  }
+}
+
 async function main() {
   console.log('Seeding database...')
 
@@ -529,9 +596,11 @@ async function main() {
   console.log('✓ roles')
 
   const countries = loadCountries()
-  if (countries.length) {
+  if (countries.length && (await prisma.country.count()) === 0) {
     await prisma.country.createMany({ data: countries })
     console.log(`✓ countries (${countries.length})`)
+  } else {
+    console.log('✓ countries (skipped, already present)')
   }
 
   await seedEmailTemplates()
@@ -555,17 +624,52 @@ async function main() {
   await seedNavigationMenus()
   console.log('✓ navigation_menus')
 
-  await seedAdminUser()
-  console.log('✓ admin user (admin@opsotech.com / Admin@123, role_id=1)')
+  await seedServices()
+  console.log('✓ services')
+
+  await seedKnowledgeBase()
+  console.log('✓ knowledge_base')
+
+  try {
+    await seedAdminUser()
+    console.log('✓ admin user (admin@opsotech.com / Admin@123, role_id=1)')
+  } catch (err: any) {
+    console.warn(`⚠ admin user skipped: ${err?.message || err}`)
+  }
 
   console.log('Seed completed.')
 }
 
-main()
-  .catch((e) => {
-    console.error(e)
-    process.exit(1)
-  })
-  .finally(async () => {
-    await prisma.$disconnect()
-  })
+const runServicesOnly = process.argv.includes('--services-only')
+const runKnowledgeBaseOnly = process.argv.includes('--knowledge-base-only')
+
+if (runServicesOnly) {
+  seedServices()
+    .then(() => console.log('✓ services'))
+    .catch((e) => {
+      console.error(e)
+      process.exit(1)
+    })
+    .finally(async () => {
+      await prisma.$disconnect()
+    })
+} else if (runKnowledgeBaseOnly) {
+  seedKnowledgeBase()
+    .then(() => console.log('✓ knowledge_base'))
+    .catch((e) => {
+      console.error(e)
+      process.exit(1)
+    })
+    .finally(async () => {
+      await prisma.$disconnect()
+    })
+} else {
+  main()
+    .catch((e) => {
+      console.error(e)
+      process.exit(1)
+    })
+    .finally(async () => {
+      await prisma.$disconnect()
+    })
+}

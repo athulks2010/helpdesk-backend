@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Getting Started: Submitting and Tracking Your First Ticket",
+    "category": "Getting Started",
+    "views": 1420,
+    "helpful": 98,
+    "created_at": "2026-09-05T10:00:00.000Z",
+    "details": "<p>Learn the step-by-step process of submitting a support request, adding attachments, and monitoring progress from initial triage to complete resolution.</p>"
+  },
+  {
+    "title": "How Ticket Priorities and SLA Windows Are Calculated",
+    "category": "SLA & Policy",
+    "views": 890,
+    "helpful": 94,
+    "created_at": "2026-08-31T10:00:00.000Z",
+    "details": "<p>Understand how priority levels impact response times, SLA expectations, and how urgent issues are escalated to engineering specialists.</p>"
+  },
+  {
+    "title": "Troubleshooting Attachment Upload and Supported File Formats",
+    "category": "Technical Help",
+    "views": 1105,
+    "helpful": 96,
+    "created_at": "2026-09-04T10:00:00.000Z",
+    "details": "<p>Review the allowed file formats (PNG, JPG, PDF, TXT, ZIP), individual size limitations, and tips for uploading system logs.</p>"
+  },
+  {
+    "title": "Account Security: Password Resets and Email Verification",
+    "category": "Account",
+    "views": 850,
+    "helpful": 91,
+    "created_at": "2026-08-24T10:00:00.000Z",
+    "details": "<p>How to reset your account password, manage registered contact details, and resolve email delivery verification problems.</p>"
+  },
+  {
+    "title": "Collaborating on Tickets: Adding CCs and Organization Members",
+    "category": "Collaboration",
+    "views": 740,
+    "helpful": 83,
+    "created_at": "2026-09-02T10:00:00.000Z",
+    "details": "<p>Learn how team members within the same organization can follow ticket threads and receive email updates on shared issues.</p>"
+  },
+  {
+    "title": "Understanding Ticket Statuses: Open, Pending, and Closed",
+    "category": "Getting Started",
+    "views": 620,
+    "helpful": 87,
+    "created_at": "2026-08-31T12:00:00.000Z",
+    "details": "<p>A reference guide explaining the operational meaning of every ticket status throughout the support lifecycle.</p>"
+  }
+]

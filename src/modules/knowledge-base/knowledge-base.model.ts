@@ -6,6 +6,9 @@ export class KnowledgeBase extends Model {
   declare title?: string
   declare type_id?: number
   declare details?: string
+  declare category?: string
+  declare views?: number
+  declare helpful?: number
 
   get content() {
     return this.getDataValue('details')
@@ -16,7 +19,12 @@ export class KnowledgeBase extends Model {
 
   toJSON() {
     const values: any = super.toJSON()
-    values.content = this.getDataValue('details')
+    const details = this.getDataValue('details') || ''
+    values.content = details
+    const paragraph = String(details).match(/<p>([\s\S]*?)<\/p>/i)
+    values.description = paragraph
+      ? paragraph[1].replace(/<[^>]*>/g, '').trim()
+      : String(details).replace(/<[^>]*>/g, '').trim()
     return values
   }
 }
@@ -28,6 +36,9 @@ export const initKnowledgeBaseModel = () => {
       title: DataTypes.STRING,
       details: DataTypes.TEXT,
       type_id: DataTypes.BIGINT.UNSIGNED,
+      category: DataTypes.STRING,
+      views: { type: DataTypes.INTEGER, defaultValue: 0 },
+      helpful: { type: DataTypes.INTEGER, defaultValue: 0 },
     },
     {
       sequelize: getSequelize(),

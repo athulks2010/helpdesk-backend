@@ -21,6 +21,27 @@ export class Service extends Model {
   toJSON() {
     const values: any = super.toJSON()
     values.content = this.getDataValue('details')
+    const image = this.getDataValue('image')
+    if (image) {
+      if (/^https?:\/\//i.test(image)) {
+        values.image_url = image
+      } else {
+        const base = (process.env.APP_URL || '').replace(/\/$/, '')
+        const imagePath = image.startsWith('/') ? image : `/${image}`
+        values.image_url = base ? `${base}${imagePath}` : imagePath
+      }
+    } else {
+      values.image_url = null
+    }
+
+    const details = this.getDataValue('details') || ''
+    const paragraph = details.match(/<p>([\s\S]*?)<\/p>/i)
+    values.description = paragraph
+      ? paragraph[1].replace(/<[^>]*>/g, '').trim()
+      : String(details).replace(/<[^>]*>/g, '').trim()
+    values.features = [...String(details).matchAll(/<li>([\s\S]*?)<\/li>/gi)].map((match) =>
+      match[1].replace(/<[^>]*>/g, '').trim()
+    )
     return values
   }
 }

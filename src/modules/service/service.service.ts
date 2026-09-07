@@ -11,12 +11,12 @@ export class ServiceService {
     return repo.findById(id)
   }
 
-  create(body: any) {
-    return repo.create(body)
+  create(body: any, file?: Express.Multer.File) {
+    return repo.create(body, file)
   }
 
-  update(body: any) {
-    return repo.update(body)
+  update(body: any, file?: Express.Multer.File) {
+    return repo.update(body, file)
   }
 
   destroy(id: number | string) {

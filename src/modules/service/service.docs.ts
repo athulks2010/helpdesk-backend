@@ -67,6 +67,32 @@
  *     requestBody:
  *       required: true
  *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [title]
+ *             properties:
+ *               title:
+ *                 type: string
+ *                 example: Omnichannel Ticket Routing
+ *               slug:
+ *                 type: string
+ *                 example: omnichannel-ticket-routing
+ *               icon:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               details:
+ *                 type: string
+ *               is_active:
+ *                 type: integer
+ *                 example: 1
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Service image file. Stored on services.image as /files/services/...
+ *               author_id:
+ *                 type: number
  *         application/json:
  *           schema:
  *             type: object
@@ -81,6 +107,7 @@
  *                 type: string
  *               image:
  *                 type: string
+ *                 description: File path, public URL, or data:image/...;base64
  *               author_id:
  *                 type: number
  *     responses:
@@ -101,6 +128,31 @@
  *     requestBody:
  *       required: true
  *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             required: [id]
+ *             properties:
+ *               id:
+ *                 type: number
+ *               title:
+ *                 type: string
+ *               slug:
+ *                 type: string
+ *               icon:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               details:
+ *                 type: string
+ *               is_active:
+ *                 type: integer
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *                 description: Replacement image. Previous file is deleted.
+ *               author_id:
+ *                 type: number
  *         application/json:
  *           schema:
  *             type: object
@@ -118,6 +170,7 @@
  *                 type: string
  *               image:
  *                 type: string
+ *                 description: File path, public URL, or data:image/...;base64
  *               author_id:
  *                 type: number
  *     responses:

@@ -81,6 +81,15 @@
  *                 type: string
  *               type_id:
  *                 type: number
+ *               category:
+ *                 type: string
+ *                 example: Getting Started
+ *               views:
+ *                 type: number
+ *                 example: 1420
+ *               helpful:
+ *                 type: number
+ *                 example: 98
  *     responses:
  *       200:
  *         description: Knowledge base article created successfully
@@ -116,6 +125,15 @@
  *                 type: string
  *               type_id:
  *                 type: number
+ *               category:
+ *                 type: string
+ *                 example: Getting Started
+ *               views:
+ *                 type: number
+ *                 example: 1420
+ *               helpful:
+ *                 type: number
+ *                 example: 98
  *     responses:
  *       200:
  *         description: Knowledge base article updated successfully

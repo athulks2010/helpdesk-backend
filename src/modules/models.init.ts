@@ -115,10 +115,19 @@ export async function initAllModels() {
   TicketActivity.belongsTo(Ticket, { as: 'ticket', foreignKey: 'ticket_id' })
   TicketActivity.belongsTo(User, { as: 'user', foreignKey: 'user_id' })
 
+  Conversation.belongsTo(Contact, { as: 'contact', foreignKey: 'contact_id' })
+  Conversation.belongsTo(User, { as: 'creator', foreignKey: 'created_by' })
+  Conversation.belongsTo(Ticket, { as: 'ticket', foreignKey: 'ticket_id' })
+  Ticket.hasMany(Conversation, { as: 'conversations', foreignKey: 'ticket_id' })
+
   Conversation.hasMany(Message, { as: 'messages', foreignKey: 'conversation_id' })
   Message.belongsTo(Conversation, { as: 'conversation', foreignKey: 'conversation_id' })
+  Message.belongsTo(User, { as: 'user', foreignKey: 'user_id' })
+  Message.belongsTo(Contact, { as: 'contact', foreignKey: 'contact_id' })
   Conversation.hasMany(Participant, { as: 'participants', foreignKey: 'conversation_id' })
   Participant.belongsTo(Conversation, { as: 'conversation', foreignKey: 'conversation_id' })
+  Participant.belongsTo(User, { as: 'user', foreignKey: 'user_id' })
+  Participant.belongsTo(Contact, { as: 'contact', foreignKey: 'contact_id' })
   Message.hasMany(MessageAttachment, { as: 'attachments', foreignKey: 'message_id' })
   MessageAttachment.belongsTo(Message, { as: 'message', foreignKey: 'message_id' })
 

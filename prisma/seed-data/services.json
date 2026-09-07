@@ -1,0 +1,50 @@
+[
+  {
+    "title": "Omnichannel Ticket Routing",
+    "slug": "omnichannel-ticket-routing",
+    "icon": "zap",
+    "is_active": 1,
+    "image": null,
+    "details": "<p>Ingest, triage, and route support tickets seamlessly from web portals, email, chat, and API endpoints.</p><ul><li>Intelligent triage</li><li>Custom rule triggers</li><li>Zero-drop queues</li></ul>"
+  },
+  {
+    "title": "SLA & Escalation Management",
+    "slug": "sla-escalation-management",
+    "icon": "shield",
+    "is_active": 1,
+    "image": null,
+    "details": "<p>Define tiered SLA policies with automated alerts and escalations before resolution breach.</p><ul><li>Target commitment</li><li>Trend escalations</li><li>Compliance auditing</li></ul>"
+  },
+  {
+    "title": "Collaborative Agent Workspace",
+    "slug": "collaborative-agent-workspace",
+    "icon": "users",
+    "is_active": 1,
+    "image": null,
+    "details": "<p>Shared timelines, private agent notes, collision detection, and instant ticket reassignment.</p><ul><li>Internal transfers</li><li>Real time sync</li><li>Rich text editor</li></ul>"
+  },
+  {
+    "title": "Self-Service Knowledge Base",
+    "slug": "self-service-knowledge-base",
+    "icon": "book-open",
+    "is_active": 1,
+    "image": null,
+    "details": "<p>Empower users with searchable documentation, category taxonomies, and instant article suggestions.</p><ul><li>Instant search</li><li>Feedback voting</li><li>Article analytics</li></ul>"
+  },
+  {
+    "title": "Real-Time Live Chat Integration",
+    "slug": "real-time-live-chat-integration",
+    "icon": "message-circle",
+    "is_active": 1,
+    "image": null,
+    "details": "<p>Connect agents and customers directly with instant messaging, attachment exchange, and typing indicators.</p><ul><li>WebSocket powered</li><li>Status indicators</li><li>Transcript history</li></ul>"
+  },
+  {
+    "title": "Operations & Performance Reporting",
+    "slug": "operations-performance-reporting",
+    "icon": "bar-chart-3",
+    "is_active": 1,
+    "image": null,
+    "details": "<p>Gain deep visibility into resolution times, first-contact resolution ratios, and team workload trends.</p><ul><li>Exportable reports</li><li>Team leaderboards</li><li>Trend visualizations</li></ul>"
+  }
+]
