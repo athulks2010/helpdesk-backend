@@ -41,6 +41,10 @@ export class PublicController {
     return service.subscribeNews(req.body?.email)
   }
 
+  async addContact(req: any) {
+    return service.addContact(req.body)
+  }
+
   async initChat(req: any) {
     const body = req.body || {}
     return service.initChat(body)

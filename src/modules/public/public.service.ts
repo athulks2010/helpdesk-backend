@@ -6,6 +6,7 @@ import { FrontPageRepository } from '../front-page/front-page.repository'
 import { TicketService } from '../ticket/ticket.service'
 import { ConversationRepository } from '../conversation/conversation.repository'
 import { ContactRepository } from '../contact/contact.repository'
+import { ContactService } from '../contact/contact.service'
 import { UserRepository } from '../user/user.repository'
 import { SettingRepository } from '../setting/setting.repository'
 import { Contact } from '../contact/contact.model'
@@ -116,6 +117,10 @@ export class PublicService {
       last_name: contact.last_name ?? null,
       message: 'You just subscribed for the latest news. Thank You!',
     }
+  }
+
+  async addContact(body: any) {
+    return new ContactService().create(body)
   }
 
   private async isNewsletterEnabled() {
