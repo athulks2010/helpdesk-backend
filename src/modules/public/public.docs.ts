@@ -134,6 +134,12 @@
  *                 type: number
  *               type_id:
  *                 type: number
+ *               path:
+ *                 type: string
+ *               filename:
+ *                 type: string
+ *               size:
+ *                 type: number
  *     responses:
  *       200:
  *         description: Ticket opened

@@ -124,6 +124,12 @@
  *                 items:
  *                   type: string
  *                 example: ["login", "urgent"]
+ *               path:
+ *                 type: string
+ *               filename:
+ *                 type: string
+ *               size:
+ *                 type: number
  *               custom_field:
  *                 type: object
  *                 example:
