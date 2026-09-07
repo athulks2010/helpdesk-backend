@@ -3,6 +3,7 @@ import fs from 'fs'
 import path from 'path'
 import { getEnvPath } from '../../core/env/env.service'
 import { Exception } from '../../core'
+import { resetPusherClient } from '../../utils/pusher'
 
 const repo = new SettingRepository()
 
@@ -215,6 +216,7 @@ export class SettingService {
     }
 
     updateEnvFile(envUpdates)
+    resetPusherClient()
 
     return { item: await this.getPusherSettings(), message: 'Pusher settings updated successfully' }
   }

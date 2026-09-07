@@ -3,6 +3,10 @@ import crypto from 'crypto'
 
 let pusher: Pusher | null = null
 
+export const resetPusherClient = () => {
+  pusher = null
+}
+
 export const getPusher = () => {
   if (pusher) return pusher
   if (!process.env.PUSHER_APP_KEY) return null

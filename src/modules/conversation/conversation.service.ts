@@ -35,10 +35,46 @@ export class ConversationService {
     try {
       const pusher = getPusher()
       if (pusher) {
-        await pusher.trigger(`chat.${data.conversation_id}`, 'NewChatMessage', msg.toJSON())
+        const rawJson: any = typeof (msg as any).toJSON === 'function' ? (msg as any).toJSON() : msg
+        const payload = {
+          chatMessage: {
+            id: rawJson.id,
+            message: rawJson.message,
+            conversation_id: rawJson.conversation_id,
+            user_id: rawJson.user_id,
+            contact_id: rawJson.contact_id,
+            created_at: rawJson.created_at || rawJson.createdAt,
+            updated_at: rawJson.updated_at || rawJson.updatedAt,
+            user: rawJson.user
+              ? {
+                  id: rawJson.user.id,
+                  first_name: rawJson.user.first_name,
+                  last_name: rawJson.user.last_name,
+                  email: rawJson.user.email,
+                  photo: rawJson.user.photo_path || null,
+                }
+              : null,
+            contact: rawJson.contact
+              ? {
+                  id: rawJson.contact.id,
+                  first_name: rawJson.contact.first_name,
+                  last_name: rawJson.contact.last_name,
+                  email: rawJson.contact.email,
+                }
+              : null,
+            attachments: rawJson.attachments || [],
+          },
+          ...rawJson,
+        }
+
+        const channelName = `chat.${data.conversation_id}`
+        const res = await pusher.trigger(channelName, 'NewChatMessage', payload)
+        console.log(`[Pusher] Broadcasted NewChatMessage to ${channelName}: status ${res.status}`)
+      } else {
+        console.warn('[Pusher] Client not initialized. Check PUSHER_APP_KEY in settings or env.')
       }
-    } catch {
-      /* pusher optional */
+    } catch (err) {
+      console.error('[Pusher:sendMessage broadcast error]', err)
     }
     return msg
   }

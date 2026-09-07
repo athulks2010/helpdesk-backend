@@ -150,7 +150,15 @@ export class ConversationRepository {
       console.error('[ConvRepo:sendMessage mail]', err)
     }
 
-    return msg
+    const fullMsg = await Message.findByPk(msg.id, {
+      include: [
+        { model: User, as: 'user', attributes: ['id', 'first_name', 'last_name', 'email', 'photo_path'] },
+        { model: Contact, as: 'contact', attributes: ['id', 'first_name', 'last_name', 'email'] },
+        { model: MessageAttachment, as: 'attachments' },
+      ],
+    })
+
+    return fullMsg || msg
   }
 
   async getMessages(conversationId: number | string, query: any = {}) {
@@ -160,6 +168,11 @@ export class ConversationRepository {
 
     const { rows, count } = await Message.findAndCountAll({
       where: { conversation_id: conversationId },
+      include: [
+        { model: User, as: 'user', attributes: ['id', 'first_name', 'last_name', 'email', 'photo_path'] },
+        { model: Contact, as: 'contact', attributes: ['id', 'first_name', 'last_name', 'email'] },
+        { model: MessageAttachment, as: 'attachments' },
+      ],
       limit: pageSize,
       offset,
       order: [['id', 'ASC']],
