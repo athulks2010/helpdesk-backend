@@ -62,6 +62,23 @@ export class TicketService {
 
     const customInputs = extractCustomInputs(body)
     const ticket = await repo.create(body)
+
+    if (body.path) {
+      try {
+        const Attachment = (await import('./attachment.model')).Attachment
+        await Attachment.create({
+          ticket_id: ticket.id,
+          path: body.path,
+          name: body.filename || null,
+          size: body.size || null,
+          user_id: body.user_id || tokenHolder?.id || null,
+          contact_id: body.contact_id || null,
+        } as any)
+      } catch (err) {
+        console.error('[TicketService:create attachment]', err)
+      }
+    }
+
     if (customInputs) {
       await fieldService.persistEntries(ticket.id, customInputs)
     }
