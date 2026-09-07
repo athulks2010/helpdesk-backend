@@ -143,10 +143,9 @@
  * @swagger
  * /public/contact:
  *   post:
- *     summary: Add a contact (requires authentication)
+ *     summary: Add a contact
  *     tags: [Public]
- *     security:
- *       - bearerAuth: []
+ *     security: []
  *     requestBody:
  *       required: true
  *       content:
