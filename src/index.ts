@@ -32,7 +32,7 @@ import { postWithMiddleware } from './modules/post/post.routes'
 import { dashboardWithMiddleware } from './modules/dashboard/dashboard.routes'
 import { reportWithMiddleware } from './modules/report/report.routes'
 import { aiWithMiddleware } from './modules/ai/ai.routes'
-import { fileUploadWithMiddleware } from './modules/file-upload/file-upload.routes'
+import { fileUpload, fileUploadWithMiddleware } from './modules/file-upload/file-upload.routes'
 import { notificationWithMiddleware } from './modules/notification/notification.routes'
 import { publicRouter } from './modules/public/public.routes'
 import { country, countryWithMiddleware } from './modules/country/country.routes'
@@ -88,6 +88,7 @@ const bootstrap = async () => {
   app.use('/dashboard', authenticationMiddleware, dashboardWithMiddleware.router)
   app.use('/report', authenticationMiddleware, reportWithMiddleware.router)
   app.use('/ai', authenticationMiddleware, aiWithMiddleware.router)
+  app.use('/file-upload', fileUpload.router)
   app.use('/file-upload', authenticationMiddleware, fileUploadWithMiddleware.router)
   app.use('/notification', authenticationMiddleware, notificationWithMiddleware.router)
 

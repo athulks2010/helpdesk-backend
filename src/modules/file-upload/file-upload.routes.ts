@@ -18,10 +18,12 @@ const upload = multer({ storage })
 
 const fileUploadController = new FileUploadController()
 
-export const fileUploadWithMiddleware = new Router()
-fileUploadWithMiddleware.post(
+export const fileUpload = new Router()
+fileUpload.post(
   '/upload',
   async (req) => fileUploadController.upload(req),
   [upload.single('file')] as any
 )
+
+export const fileUploadWithMiddleware = new Router()
 fileUploadWithMiddleware.get('/list', async () => fileUploadController.list())
