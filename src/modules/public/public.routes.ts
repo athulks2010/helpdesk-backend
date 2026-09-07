@@ -1,6 +1,7 @@
 import { Router } from '../../core'
 import { Faq } from '../faq/faq.model'
 import { Post } from '../post/post.model'
+import { Type } from '../type/type.model'
 import { KnowledgeBase } from '../knowledge-base/knowledge-base.model'
 import { Service } from '../service/service.model'
 import { FrontPage } from '../front-page/front-page.model'
@@ -37,12 +38,15 @@ publicRouter.get('/posts/single', async (req) => {
 })
 
 publicRouter.get('/knowledge-base', async () => {
-  const items = await KnowledgeBase.findAll({ order: [['id', 'DESC']] })
+  const items = await KnowledgeBase.findAll({
+    include: [{ model: Type, as: 'type' }],
+    order: [['id', 'ASC']],
+  })
   return { items, totalCount: items.length, message: 'OK' }
 })
 
 publicRouter.get('/services', async () => {
-  const items = await Service.findAll({ order: [['id', 'DESC']] })
+  const items = await Service.findAll({ order: [['id', 'ASC']] })
   return { items, totalCount: items.length, message: 'OK' }
 })
 

@@ -51,6 +51,27 @@ export class FileUploadService {
     }
   }
 
+  saveBuffer(buffer: Buffer, folder: string, filename: string) {
+    folder = folder.replace(/[^a-zA-Z0-9_-]/g, '') || 'files'
+    const targetDir = path.resolve(process.cwd(), 'public', 'files', folder)
+    ensureUploadDir(targetDir)
+    const safe = filename.replace(/[^a-zA-Z0-9._-]/g, '_')
+    fs.writeFileSync(path.join(targetDir, safe), buffer)
+    return `/files/${folder}/${safe}`
+  }
+
+  deletePublicPath(publicPath?: string | null) {
+    if (!publicPath || typeof publicPath !== 'string') return
+    const relative = publicPath.replace(/^\/+/, '')
+    if (!relative.startsWith('files/')) return
+    const full = path.resolve(process.cwd(), 'public', relative)
+    const root = path.resolve(process.cwd(), 'public', 'files')
+    if (!full.startsWith(root)) return
+    if (fs.existsSync(full) && fs.statSync(full).isFile()) {
+      fs.unlinkSync(full)
+    }
+  }
+
   async list() {
     ensureUploadDir()
     const files = fs.readdirSync(UPLOAD_DIR).map((name) => {
