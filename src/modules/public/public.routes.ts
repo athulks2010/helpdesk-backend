@@ -51,6 +51,7 @@ publicRouter.get('/front-page', async (req) => {
 
 publicRouter.post('/ticket/open', async (req) => {
   const body = req.body || {}
+  const password = Math.random().toString(36).slice(-8)
   const ticket = await new TicketService().create({
     subject: body.subject,
     details: body.details || body.body || body.message,
@@ -63,6 +64,7 @@ publicRouter.post('/ticket/open', async (req) => {
     category_id: body.category_id,
     type_id: body.type_id,
     source: 'public',
+    password,
   })
   return { ...ticket.toJSON(), message: 'Ticket opened' }
 })
