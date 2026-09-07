@@ -3,6 +3,22 @@ import { PublicService } from './public.service'
 const service = new PublicService()
 
 export class PublicController {
+  async getDepartments(req: any) {
+    return service.getDepartments(req.query)
+  }
+
+  async getCategories(req: any) {
+    return service.getCategories(req.query)
+  }
+
+  async getPriorities(req: any) {
+    return service.getPriorities(req.query)
+  }
+
+  async getTypes(req: any) {
+    return service.getTypes(req.query)
+  }
+
   async getFaqs(req: any) {
     return service.getFaqs()
   }

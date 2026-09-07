@@ -20,3 +20,8 @@ publicRouter.post('/chat/init', (req) => ctrl.initChat(req))
 publicRouter.get('/chat/conversation', (req) => ctrl.getConversation(req))
 publicRouter.post('/chat/send-message', (req) => ctrl.sendChatMessage(req))
 
+publicRouter.get('/departments', (req) => ctrl.getDepartments(req))
+publicRouter.get('/categories', (req) => ctrl.getCategories(req))
+publicRouter.get('/priorities', (req) => ctrl.getPriorities(req))
+publicRouter.get('/types', (req) => ctrl.getTypes(req))
+

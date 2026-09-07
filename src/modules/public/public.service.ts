@@ -9,11 +9,36 @@ import { ContactRepository } from '../contact/contact.repository'
 import { ContactService } from '../contact/contact.service'
 import { UserRepository } from '../user/user.repository'
 import { SettingRepository } from '../setting/setting.repository'
+import { DepartmentRepository } from '../department/department.repository'
+import { CategoryRepository } from '../category/category.repository'
+import { PriorityRepository } from '../priority/priority.repository'
+import { TypeRepository } from '../type/type.repository'
 import { Contact } from '../contact/contact.model'
 import { Exception } from '../../core'
 import { getPusher } from '../../utils/pusher'
 
 export class PublicService {
+  async getDepartments(query: any = {}) {
+    const pageSize = Number(query?.pageSize) || 100
+    return new DepartmentRepository().findAll({ ...query, pageSize })
+  }
+
+  async getCategories(query: any = {}) {
+    const pageSize = Number(query?.pageSize) || 100
+    return new CategoryRepository().findAll({ ...query, pageSize })
+  }
+
+  async getPriorities(query: any = {}) {
+    const pageSize = Number(query?.pageSize) || 100
+    return new PriorityRepository().findAll({ ...query, pageSize })
+  }
+
+  async getTypes(query: any = {}) {
+    const pageSize = Number(query?.pageSize) || 100
+    return new TypeRepository().findAll({ ...query, pageSize })
+  }
+
+
   async getFaqs() {
     const res = await new FaqRepository().findAll({ sortOrder: 'ASC' })
     return res

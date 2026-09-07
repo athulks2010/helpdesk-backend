@@ -267,3 +267,58 @@
  *       200:
  *         description: Message sent
  */
+
+/**
+ * @swagger
+ * /public/departments:
+ *   get:
+ *     summary: List public departments
+ *     tags: [Public]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Departments fetched successfully
+ */
+
+/**
+ * @swagger
+ * /public/categories:
+ *   get:
+ *     summary: List public categories
+ *     tags: [Public]
+ *     security: []
+ *     parameters:
+ *       - in: query
+ *         name: department_id
+ *         schema:
+ *           type: number
+ *     responses:
+ *       200:
+ *         description: Categories fetched successfully
+ */
+
+/**
+ * @swagger
+ * /public/priorities:
+ *   get:
+ *     summary: List public priorities
+ *     tags: [Public]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Priorities fetched successfully
+ */
+
+/**
+ * @swagger
+ * /public/types:
+ *   get:
+ *     summary: List public ticket types
+ *     tags: [Public]
+ *     security: []
+ *     responses:
+ *       200:
+ *         description: Types fetched successfully
+ */
+
+
