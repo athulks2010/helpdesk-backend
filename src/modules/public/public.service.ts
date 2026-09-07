@@ -7,6 +7,9 @@ import { TicketService } from '../ticket/ticket.service'
 import { ConversationRepository } from '../conversation/conversation.repository'
 import { ContactRepository } from '../contact/contact.repository'
 import { UserRepository } from '../user/user.repository'
+import { SettingRepository } from '../setting/setting.repository'
+import { Contact } from '../contact/contact.model'
+import { Exception } from '../../core'
 import { getPusher } from '../../utils/pusher'
 
 export class PublicService {
@@ -84,19 +87,51 @@ export class PublicService {
   }
 
   async subscribeNews(email: string) {
-    if (email) {
-      const contactRepo = new ContactRepository()
-      const res = await contactRepo.findAll({ email })
-      const contact = res.items.find((c: any) => c.email === email)
-      if (!contact) {
-        await contactRepo.create({
-          email,
-          first_name: 'Subscriber',
-          last_name: '',
-        })
-      }
+    const value = String(email || '').trim()
+    if (!value) {
+      throw new Exception({ message: 'Email is required', httpResponseCode: 400 })
     }
-    return { email, message: 'Subscribed' }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      throw new Exception({ message: 'A valid email is required', httpResponseCode: 400 })
+    }
+    if (value.length > 50) {
+      throw new Exception({ message: 'Email must be 50 characters or fewer', httpResponseCode: 400 })
+    }
+
+    const newsletterEnabled = await this.isNewsletterEnabled()
+    if (!newsletterEnabled) {
+      throw new Exception({ message: 'Newsletter is disabled', httpResponseCode: 400 })
+    }
+
+    const contact = await Contact.create({
+      email: value,
+      first_name: null,
+      last_name: null,
+    } as any)
+
+    return {
+      id: contact.id,
+      email: contact.email,
+      first_name: contact.first_name ?? null,
+      last_name: contact.last_name ?? null,
+      message: 'You just subscribed for the latest news. Thank You!',
+    }
+  }
+
+  private async isNewsletterEnabled() {
+    try {
+      const setting = await new SettingRepository().findBySlug('enable_options')
+      let options: any = setting?.value
+      if (typeof options === 'string') {
+        options = JSON.parse(options)
+      }
+      if (!Array.isArray(options)) return false
+      const item = options.find((option: any) => option?.slug === 'newsletter')
+      if (!item) return false
+      return item.value === true || item.value === 1 || item.value === '1' || item.value === 'true'
+    } catch {
+      return false
+    }
   }
 
   async initChat(body: any) {
@@ -133,7 +168,7 @@ export class PublicService {
         department: body.department || 'general',
         initial_message: 'Hello! Welcome to our support chat. An agent will be with you shortly.'
       })
-      
+
       const welcomeMsgRes = await convRepo.getMessages(conversation.id, { pageSize: 1 })
       const welcomeMsg: any = welcomeMsgRes.items[0]
       if (welcomeMsg) {
@@ -153,7 +188,7 @@ export class PublicService {
           }
           try {
             await pusher.trigger(`chat.${conversation.id}`, 'NewChatMessage', payload)
-          } catch (e) {}
+          } catch (e) { }
         }
       }
     }
@@ -169,10 +204,10 @@ export class PublicService {
     const convRepo = new ConversationRepository()
     const conversation = await convRepo.findById(id)
     const messagesRes = await convRepo.getMessages(id, { pageSize: 1000 })
-    return { 
-      conversation: conversation?.toJSON ? conversation.toJSON() : conversation, 
-      messages: messagesRes.items, 
-      message: 'OK' 
+    return {
+      conversation: conversation?.toJSON ? conversation.toJSON() : conversation,
+      messages: messagesRes.items,
+      message: 'OK'
     }
   }
 
@@ -204,7 +239,7 @@ export class PublicService {
       try {
         await pusher.trigger(`chat.${body.conversation_id}`, 'NewChatMessage', payload)
         await pusher.trigger(`chat.${body.conversation_id}`, 'NewPublicChatMessage', payload)
-      } catch (e) {}
+      } catch (e) { }
     }
 
     return { ...rawJson, message: 'Sent' }
