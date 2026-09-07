@@ -84,6 +84,18 @@ export class PublicService {
   }
 
   async subscribeNews(email: string) {
+    if (email) {
+      const contactRepo = new ContactRepository()
+      const res = await contactRepo.findAll({ email })
+      const contact = res.items.find((c: any) => c.email === email)
+      if (!contact) {
+        await contactRepo.create({
+          email,
+          first_name: 'Subscriber',
+          last_name: '',
+        })
+      }
+    }
     return { email, message: 'Subscribed' }
   }
 
